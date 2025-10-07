@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>초록돛단배</title>
+  <link rel="icon" href="data:,"/>
+ <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&family=Noto+Serif+KR:wght@700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --sea:#e6f7ff; --deep:#0f6fae; --green:#27ae60; --ink:#0b2430;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; font-family:system-ui, Pretendard, Apple SD Gothic Neo, sans-serif;
+      background:linear-gradient(#cfefff,#eaf7ff 40%, #ffffff 100%);
+      color:var(--ink);
+    }
+    /* 상단 헤더 */
+    header{
+      max-width:1000px; margin:0 auto; padding:18px 18px 0; display:flex; align-items:center; gap:10px;
+    }
+    .badge{background:#e9fff0;border:1px solid #bde7cb;padding:6px 12px;border-radius:999px;font-weight:700}
+    .brand{font-weight:900;font-size:18px}
+    /* 히어로 섹션 */
+    .hero{
+      max-width:1000px; margin:0 auto; padding:40px 18px 0; position:relative; z-index:1;
+      display:grid; gap:18px;
+    }
+    .title{font-size: clamp(28px, 5vw, 44px); line-height:1.2; font-weight:900;}
+    .subtitle{font-size: clamp(14px, 2.8vw, 18px); opacity:.85}
+    .cta{display:flex; gap:12px; flex-wrap:wrap; margin-top:4px}
+    .btn{
+      background:var(--green); color:#fff; border:none; border-radius:12px;
+      padding:12px 18px; font-weight:800; cursor:pointer; text-decoration:none;
+      box-shadow:0 8px 24px rgba(39,174,96,.18);
+    }
+    .btn.secondary{background:var(--deep)}
+    .note{font-size:13px; opacity:.7}
+
+    /* 바다/파도/보트 */
+    .ocean-wrap{position:relative; height:52vh; min-height:320px; margin-top:10px; overflow:hidden;}
+    .ocean{
+      position:absolute; inset:0;
+      background:linear-gradient(180deg, rgba(15,111,174,.10), rgba(15,111,174,.18)), radial-gradient(120% 70% at 50% 10%, #dff3ff 0%, #bfe8ff 45%, #a6ddff 80%);
+    }
+    .wave{
+      position:absolute; left:-200px; width:400%; height:220px; top:20%;
+      background:radial-gradient(circle at 50% 50%, rgba(255,255,255,.65) 25%, rgba(255,255,255,0) 70%);
+      opacity:.5; filter:blur(0.2px); animation:swim 10s linear infinite;
+    }
+    .wave.w2{animation-duration:13s; opacity:.35; top:35%}
+    .wave.w3{animation-duration:16s; opacity:.25; top:50%}
+    @keyframes swim{from{transform:translateX(0)}to{transform:translateX(-25%)}}
+
+    .route{
+      position:absolute; left:6%; right:6%; bottom:18%; height:12px; border-radius:999px; overflow:hidden;
+      background:rgba(255,255,255,.7); box-shadow: inset 0 0 0 2px rgba(255,255,255,.6);
+    }
+    .route .bar{position:absolute; inset:0; width:36%; background:linear-gradient(90deg, var(--green), #7fd8a6)}
+
+    .boat{
+      position:absolute; bottom:calc(18% + 10px); width:84px; transform:translateX(-50%);
+      transition:left .8s ease; filter: drop-shadow(0 6px 18px rgba(0,0,0,.15));
+    }
+    .boat img{width:100%}
+    .buoy{
+      position:absolute; bottom:calc(18% + 6px); width:22px; height:22px; border-radius:50%;
+      background:#fffc; box-shadow:0 0 0 2px #fff8;
+    }
+
+    /* 바닥 정보 */
+    .footer{
+      max-width:1000px; margin:0 auto; padding:16px 18px 28px; display:flex; justify-content:space-between; align-items:center; gap:10px;
+      color:#0b2430a6; font-size:13px;
+    }
+    .sdgs{display:flex; gap:8px; flex-wrap:wrap}
+    .chip{background:#fff; border:1px solid #e5eef6; border-radius:999px; padding:6px 10px; font-weight:700}
+    @media (max-width:520px){ .boat{width:64px} }
+  </style>
+</head>
+<body>
+  <header>
+    <span class="badge">초록돛단배</span>
+    <div class="brand">친환경 생활 습관 챌린지</div>
+  </header>
+
+  <section class="hero">
+    <h1 class="title">작은 습관이<br>우리의 <span style="color:var(--deep)">항로</span>를 바꾼다</h1>
+    <p class="subtitle">
+      오늘의 실천을 기록하면 초록 돛단배가 앞으로 나아가요.<br>
+      반별 평균으로 공정하게 비교하고, 모두의 실천이 하나의 항로가 됩니다.
+    </p>
+    <div class="cta">
+      <a class="btn" href="log.html">⛵ 승선하기 · 오늘의 기록</a>
+      <a class="btn secondary" href="board.html">🌍 함대 현황판 보기</a>
+    </div>
+    <p class="note">※ SDGs 12(지속가능한 소비) · 13(기후변화 대응)</p>
+  </section>
+
+  <!-- 바다/항로/배 연출 -->
+  <div class="ocean-wrap">
+    <div class="ocean">
+      <div class="wave"></div>
+      <div class="wave w2"></div>
+      <div class="wave w3"></div>
+
+      <!-- 항로 게이지 -->
+      <div class="route"><div class="bar" id="bar"></div></div>
+
+      <!-- 도착 지점 표식(부표) -->
+      <div class="buoy" style="left:88%"></div>
+
+      <!-- 배 아이콘 -->
+      <div class="boat" id="boat"><img src="https://www.svgrepo.com/show/252984/sailboat-boat.svg" alt="boat"></div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="sdgs">
+      <span class="chip">SDGs 12</span>
+      <span class="chip">SDGs 13</span>
+      <span class="chip">공동체 데이터 시각화</span>
+    </div>
+    <div>© 2025 Green Sail</div>
+  </div>
+
+  <script>
+    // 간단한 데모: 랜딩에서 배를 "진행률"만큼 이동시켜 감성 주기
+    // (실사용에선 오늘 달성률을 Firebase에서 가져와 반영하면 더 좋음)
+    const boat = document.getElementById('boat');
+    const bar = document.getElementById('bar');
+
+    function setProgress(pct){ // 0~100
+      const wrap = document.querySelector('.ocean-wrap');
+      const ocean = document.querySelector('.ocean');
+      const pad = wrap.clientWidth * 0.06; // 좌우 패딩(6%)
+      const x = pad + (wrap.clientWidth - pad*2) * (pct/100);
+      boat.style.left = x + 'px';
+      bar.style.width = Math.max(8, pct) + '%';
+    }
+
+    // 입장 애니메이션: 10%→현재값
+    let target = 36; // 임시 진행률 (나중엔 실제 데이터로 대체)
+    setProgress(10);
+    setTimeout(()=>setProgress(target), 300);
+
+    // 창 크기 바뀌어도 위치 유지
+    window.addEventListener('resize', ()=>setProgress(target));
+  </script>
+</body>
+</html>
