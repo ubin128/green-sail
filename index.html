@@ -1,153 +1,181 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="utf-8" />
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>초록돛단배</title>
-  <link rel="icon" href="data:,"/>
- <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&family=Noto+Serif+KR:wght@700&display=swap" rel="stylesheet">
+
+  <!-- ✅ 나눔스퀘어 폰트 -->
+  <style>
+    @font-face{
+      font-family:'NanumSquare';
+      src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2107@1.1/NanumSquare-Regular.woff') format('woff');
+      font-weight:400; font-style:normal;
+    }
+    @font-face{
+      font-family:'NanumSquare';
+      src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2107@1.1/NanumSquare-Bold.woff') format('woff');
+      font-weight:700; font-style:normal;
+    }
+  </style>
+
   <style>
     :root{
-      --sea:#e6f7ff; --deep:#0f6fae; --green:#27ae60; --ink:#0b2430;
+      --deep1:#041421;
+      --deep2:#062238;
+      --deep3:#0a2f4e;
+      --ink:#eaf6ff;
+      --accent:#3bd1c6;
     }
     *{box-sizing:border-box}
-    html,body{height:100%}
     body{
-      margin:0; font-family:system-ui, Pretendard, Apple SD Gothic Neo, sans-serif;
-      background:linear-gradient(#cfefff,#eaf7ff 40%, #ffffff 100%);
-      color:var(--ink);
+      margin:0; font-family:'NanumSquare', sans-serif; color:var(--ink);
+      background: radial-gradient(120% 90% at 50% 0%, var(--deep2), var(--deep1) 50%) fixed,
+                  linear-gradient(180deg, var(--deep1), var(--deep3)) fixed;
+      overflow-x:hidden;
     }
-    /* 상단 헤더 */
-    header{
-      max-width:1000px; margin:0 auto; padding:18px 18px 0; display:flex; align-items:center; gap:10px;
-    }
-    .badge{background:#e9fff0;border:1px solid #bde7cb;padding:6px 12px;border-radius:999px;font-weight:700}
-    .brand{font-weight:900;font-size:18px}
-    /* 히어로 섹션 */
-    .hero{
-      max-width:1000px; margin:0 auto; padding:40px 18px 0; position:relative; z-index:1;
-      display:grid; gap:18px;
-    }
-    .title{font-size: clamp(28px, 5vw, 44px); line-height:1.2; font-weight:900;}
-    .subtitle{font-size: clamp(14px, 2.8vw, 18px); opacity:.85}
-    .cta{display:flex; gap:12px; flex-wrap:wrap; margin-top:4px}
-    .btn{
-      background:var(--green); color:#fff; border:none; border-radius:12px;
-      padding:12px 18px; font-weight:800; cursor:pointer; text-decoration:none;
-      box-shadow:0 8px 24px rgba(39,174,96,.18);
-    }
-    .btn.secondary{background:var(--deep)}
-    .note{font-size:13px; opacity:.7}
 
-    /* 바다/파도/보트 */
-    .ocean-wrap{position:relative; height:52vh; min-height:320px; margin-top:10px; overflow:hidden;}
-    .ocean{
-      position:absolute; inset:0;
-      background:linear-gradient(180deg, rgba(15,111,174,.10), rgba(15,111,174,.18)), radial-gradient(120% 70% at 50% 10%, #dff3ff 0%, #bfe8ff 45%, #a6ddff 80%);
-    }
-    .wave{
-      position:absolute; left:-200px; width:400%; height:220px; top:20%;
-      background:radial-gradient(circle at 50% 50%, rgba(255,255,255,.65) 25%, rgba(255,255,255,0) 70%);
-      opacity:.5; filter:blur(0.2px); animation:swim 10s linear infinite;
-    }
-    .wave.w2{animation-duration:13s; opacity:.35; top:35%}
-    .wave.w3{animation-duration:16s; opacity:.25; top:50%}
-    @keyframes swim{from{transform:translateX(0)}to{transform:translateX(-25%)}}
+    .wrap{max-width:1100px; margin:0 auto; padding:0 20px}
+    .spacer{height:14vh}
 
-    .route{
-      position:absolute; left:6%; right:6%; bottom:18%; height:12px; border-radius:999px; overflow:hidden;
-      background:rgba(255,255,255,.7); box-shadow: inset 0 0 0 2px rgba(255,255,255,.6);
-    }
-    .route .bar{position:absolute; inset:0; width:36%; background:linear-gradient(90deg, var(--green), #7fd8a6)}
+    /* 페이드인 */
+    .fade{opacity:0; transform:translateY(16px); transition:opacity 1s ease, transform 1s ease}
+    .fade.visible{opacity:1; transform:none}
 
+    /* Hero */
+    .hero{min-height:100vh; display:flex; align-items:center; position:relative}
+    .hero h1{font-size:clamp(28px,5.6vw,64px); margin:0 0 20px; font-weight:700; text-shadow:0 8px 36px rgba(0,0,0,.4)}
+    .hero p.sub{font-size:clamp(14px,2.2vw,20px); opacity:.9}
+
+    /* 보트 */
     .boat{
-      position:absolute; bottom:calc(18% + 10px); width:84px; transform:translateX(-50%);
-      transition:left .8s ease; filter: drop-shadow(0 6px 18px rgba(0,0,0,.15));
+      position:fixed; left:calc(55% + 240px); top:24vh;
+      width:84px; transform:translateX(-50%) rotate(0deg);
+      transform-origin:center center;
+      transition:opacity 1.5s ease;  /* 초기엔 투명도만 */
+      filter:drop-shadow(0 12px 30px rgba(0,0,0,.45));
+      opacity:0; z-index:10;
     }
     .boat img{width:100%}
-    .buoy{
-      position:absolute; bottom:calc(18% + 6px); width:22px; height:22px; border-radius:50%;
-      background:#fffc; box-shadow:0 0 0 2px #fff8;
-    }
 
-    /* 바닥 정보 */
-    .footer{
-      max-width:1000px; margin:0 auto; padding:16px 18px 28px; display:flex; justify-content:space-between; align-items:center; gap:10px;
-      color:#0b2430a6; font-size:13px;
+    /* 섬 */
+    .island{min-height:80vh; display:flex; align-items:center}
+    .card{
+      background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.14);
+      padding:22px 18px; border-radius:16px; backdrop-filter:blur(6px);
+      box-shadow:0 10px 40px rgba(0,0,0,.35); max-width:560px;
     }
-    .sdgs{display:flex; gap:8px; flex-wrap:wrap}
-    .chip{background:#fff; border:1px solid #e5eef6; border-radius:999px; padding:6px 10px; font-weight:700}
-    @media (max-width:520px){ .boat{width:64px} }
+    .chip{display:inline-block; padding:6px 12px; border-radius:999px; font-weight:700;
+      background:rgba(59,209,198,.18); border:1px solid rgba(59,209,198,.4); margin-bottom:10px}
+    .island h2{margin:6px 0 8px; font-size:clamp(22px,4.2vw,36px)}
+
+    .isle-mark{
+      width:92px; height:92px; border-radius:18px;
+      background:linear-gradient(180deg,#99f2c8,#1f8a70);
+      border:2px solid rgba(255,255,255,.4);
+      box-shadow:0 8px 30px rgba(0,0,0,.35);
+      display:flex; align-items:center; justify-content:center;
+      margin-bottom:12px; overflow:hidden;
+      opacity:0; transform:translateY(14px);
+      transition:opacity .9s ease, transform .9s ease;
+    }
+    .isle-mark.visible{opacity:1; transform:none}
+
+    .btn{display:inline-block; margin-top:6px;
+      background:linear-gradient(90deg,#3bd1c6,#7ee8de);
+      color:#063346; text-decoration:none; font-weight:700;
+      padding:12px 16px; border-radius:12px; box-shadow:0 8px 24px rgba(59,209,198,.25)}
+    .btn:hover{filter:brightness(1.05)}
+
+    .footer{height:16vh}
   </style>
 </head>
 <body>
-  <header>
-    <span class="badge">초록돛단배</span>
-    <div class="brand">친환경 생활 습관 챌린지</div>
-  </header>
 
-  <section class="hero">
-    <h1 class="title">작은 습관이<br>우리의 <span style="color:var(--deep)">항로</span>를 바꾼다</h1>
-    <p class="subtitle">
-      오늘의 실천을 기록하면 초록 돛단배가 앞으로 나아가요.<br>
-      반별 평균으로 공정하게 비교하고, 모두의 실천이 하나의 항로가 됩니다.
-    </p>
-    <div class="cta">
-      <a class="btn" href="log.html">⛵ 승선하기 · 오늘의 기록</a>
-      <a class="btn secondary" href="board.html">🌍 함대 현황판 보기</a>
+  <!-- Hero -->
+  <section class="hero wrap">
+    <div>
+      <h1 class="fade" id="title">작은 습관이<br>우리의 <span style="color:#7ee8de">항로</span>를 바꾼다</h1>
+      <p class="sub fade" id="subtitle">친환경 실천이 모이면, 우리 반의 항로가 보입니다.<br>아래로 스크롤해 항해를 시작하세요.</p>
     </div>
-    <p class="note">※ SDGs 12(지속가능한 소비) · 13(기후변화 대응)</p>
   </section>
 
-  <!-- 바다/항로/배 연출 -->
-  <div class="ocean-wrap">
-    <div class="ocean">
-      <div class="wave"></div>
-      <div class="wave w2"></div>
-      <div class="wave w3"></div>
-
-      <!-- 항로 게이지 -->
-      <div class="route"><div class="bar" id="bar"></div></div>
-
-      <!-- 도착 지점 표식(부표) -->
-      <div class="buoy" style="left:88%"></div>
-
-      <!-- 배 아이콘 -->
-      <div class="boat" id="boat"><img src="https://www.svgrepo.com/show/252984/sailboat-boat.svg" alt="boat"></div>
-    </div>
+  <!-- 보트 -->
+  <div id="boat" class="boat">
+    <img src="ship-yacht.svg" alt="보트">
   </div>
 
-  <div class="footer">
-    <div class="sdgs">
-      <span class="chip">SDGs 12</span>
-      <span class="chip">SDGs 13</span>
-      <span class="chip">공동체 데이터 시각화</span>
+  <div class="spacer"></div>
+
+  <!-- 섬 1 -->
+  <section class="island wrap" id="isle-log">
+    <div class="card fade">
+      <div class="isle-mark" id="mark-log">
+        <span style="font-size:30px">🏝️</span>
+      </div>
+      <span class="chip">첫 번째 섬</span>
+      <h2>오늘의 기록</h2>
+      <p>오늘 실천한 항목을 간단히 체크하고 저장하세요.</p>
+      <a href="log.html" class="btn">기록하기</a>
     </div>
-    <div>© 2025 Green Sail</div>
-  </div>
+  </section>
+
+  <div class="spacer"></div>
+
+  <!-- 섬 2 -->
+  <section class="island wrap" id="isle-board">
+    <div class="card fade">
+      <div class="isle-mark" id="mark-board"><span style="font-size:30px">🏝️</span></div>
+      <span class="chip">두 번째 섬</span>
+      <h2>함대 현황판</h2>
+      <p>반별 평균 달성률로 비교합니다. 모두의 항해가 모여 학교의 항로가 됩니다.</p>
+      <a href="board.html" class="btn">현황판 보기</a>
+    </div>
+  </section>
+
+  <div class="footer"></div>
 
   <script>
-    // 간단한 데모: 랜딩에서 배를 "진행률"만큼 이동시켜 감성 주기
-    // (실사용에선 오늘 달성률을 Firebase에서 가져와 반영하면 더 좋음)
-    const boat = document.getElementById('boat');
-    const bar = document.getElementById('bar');
+    // 페이드인/아웃
+    const io = new IntersectionObserver((entries)=>{
+      entries.forEach(entry=>{
+        if(entry.isIntersecting){
+          entry.target.classList.add('visible');
+        } else {
+          entry.target.classList.remove('visible');
+        }
+      });
+    }, {threshold:0.25});
+    document.querySelectorAll('.fade, .isle-mark').forEach(n=>io.observe(n));
 
-    function setProgress(pct){ // 0~100
-      const wrap = document.querySelector('.ocean-wrap');
-      const ocean = document.querySelector('.ocean');
-      const pad = wrap.clientWidth * 0.06; // 좌우 패딩(6%)
-      const x = pad + (wrap.clientWidth - pad*2) * (pct/100);
-      boat.style.left = x + 'px';
-      bar.style.width = Math.max(8, pct) + '%';
-    }
+    // 초기 순차 등장
+    window.addEventListener('load', ()=>{
+      const boat = document.getElementById('boat');
+      document.getElementById('title').classList.add('visible');
+      setTimeout(()=>document.getElementById('subtitle').classList.add('visible'), 300);
 
-    // 입장 애니메이션: 10%→현재값
-    let target = 36; // 임시 진행률 (나중엔 실제 데이터로 대체)
-    setProgress(10);
-    setTimeout(()=>setProgress(target), 300);
+      // 보트 1단계: 페이드인
+      setTimeout(()=> {
+        boat.style.opacity = 1;
+      }, 500);
 
-    // 창 크기 바뀌어도 위치 유지
-    window.addEventListener('resize', ()=>setProgress(target));
+      // 보트 2단계: 회전 (천천히 2초 동안)
+      setTimeout(()=> {
+        boat.style.transition = "transform 2s ease";
+        boat.style.transform = "translateX(-20%) rotate(90deg)";
+      }, 1500);
+    });
+
+    // 스크롤 시 보트 하강
+    window.addEventListener('scroll', ()=>{
+      const boat = document.getElementById('boat');
+      const scrollTop = window.scrollY;
+      const docHeight = document.body.scrollHeight - window.innerHeight;
+      const pct = scrollTop / docHeight;
+      const minY = window.innerHeight * 0.24;
+      const maxY = window.innerHeight * 0.72;
+      boat.style.top = (minY + (maxY-minY)*pct) + "px";
+    });
   </script>
 </body>
 </html>
