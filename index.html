@@ -43,7 +43,7 @@
     .fade.visible{opacity:1; transform:none}
 
     /* Hero */
-    .hero{min-height:100vh; display:flex; align-items:center; position:relative}
+    .hero{min-height:100vh; display:flex; align-items:flex-start; padding-top: 20vh; position:relative; }
     .hero h1{font-size:clamp(28px,5.6vw,64px); margin:0 0 20px; font-weight:700; text-shadow:0 8px 36px rgba(0,0,0,.4)}
     .hero p.sub{font-size:clamp(14px,2.2vw,20px); opacity:.9}
 
@@ -58,30 +58,17 @@
     }
     .boat img{width:100%}
 
-    /* 섬 섹션 공통 */
-    .island{min-height:80vh; display:flex; align-items:center}
-
-    /* ✅ 섬 카드: 가로/높이 통일 */
-    .island .card{
-      background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.14);
-      padding:22px 18px;
-      border-radius:16px;
-      backdrop-filter:blur(6px);
-      box-shadow:0 10px 40px rgba(0,0,0,.35);
-
-      width: min(560px, 100%);  /* 반응형 가로 */
-      min-height: 240px;        /* 고정 느낌의 최소 높이 */
-      display: flex;            /* 내부 정렬 안정화 */
-      flex-direction: column;
-      gap: 10px;
-      justify-content: flex-start; /* 필요 시 center로 바꿔도 됨 */
+    /* 섬 */
+    .island{min-height:80vh; display:flex; align-items:center }
+    .card{
+      background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.14);
+      padding:30px 40px; border-radius:16px; backdrop-filter:blur(6px);
+      box-shadow:0 10px 40px rgba(0,0,0,.35); 
+      width: min(530px, 100%);           /* 넓은 화면: 560px로 통일 / 좁은 화면: 80%로 축소 */
+      flex: 0 0 min(530px, 100%);        /* flex 아이템이 내용 길이에 맞춰 줄어들지 않도록 고정 */
     }
-
-    .chip{
-      display:inline-block; padding:6px 12px; border-radius:999px; font-weight:700;
-      background:rgba(59,209,198,.18); border:1px solid rgba(59,209,198,.4); margin-bottom:10px
-    }
+    .chip{display:inline-block; padding:6px 12px; border-radius:999px; font-weight:700;
+      background:rgba(59,209,198,.18); border:1px solid rgba(59,209,198,.4); margin-bottom:10px}
     .island h2{margin:6px 0 8px; font-size:clamp(22px,4.2vw,36px)}
 
     .isle-mark{
@@ -93,24 +80,16 @@
       margin-bottom:12px; overflow:hidden;
       opacity:0; transform:translateY(14px);
       transition:opacity .9s ease, transform .9s ease;
-      flex: 0 0 auto; /* 카드 높이에 영향 안 주도록 */
     }
     .isle-mark.visible{opacity:1; transform:none}
 
-    .btn{
-      display:inline-block; margin-top:auto;  /* 버튼을 아래로 밀고 싶으면 auto, 아니면 제거 */
+    .btn{display:inline-block; margin-top:6px;
       background:linear-gradient(90deg,#3bd1c6,#7ee8de);
       color:#063346; text-decoration:none; font-weight:700;
-      padding:12px 16px; border-radius:12px; box-shadow:0 8px 24px rgba(59,209,198,.25)
-    }
+      padding:12px 16px; border-radius:12px; box-shadow:0 8px 24px rgba(59,209,198,.25)}
     .btn:hover{filter:brightness(1.05)}
 
     .footer{height:16vh}
-
-    /* 📱 모바일에서 카드 높이 살짝 조정하고 싶으면 */
-    @media (max-width:520px){
-      .island .card{ min-height: 220px; }
-    }
   </style>
 </head>
 <body>
@@ -151,7 +130,7 @@
       <div class="isle-mark" id="mark-board"><span style="font-size:30px">🏝️</span></div>
       <span class="chip">두 번째 섬</span>
       <h2>함대 현황판</h2>
-      <p>반별 평균 달성률을 비교해보아요. 모두의 항해가 모여 학교의 항로가 됩니다.</p>
+      <p>반별 평균 달성률을 비교해보아요. <br>모두의 항해가 모여 학교의 항로가 됩니다.</p>
       <a href="board.html" class="btn">현황판 보기</a>
     </div>
   </section>
@@ -201,4 +180,4 @@
     });
   </script>
 </body>
-</html>
+</html> 
