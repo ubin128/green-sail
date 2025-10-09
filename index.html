@@ -43,32 +43,38 @@
     .fade.visible{opacity:1; transform:none}
 
     /* Hero */
-    .hero{min-height:100vh; display:flex; align-items:flex-start; padding-top: 20vh; position:relative; }
-    .hero h1{font-size:clamp(28px,5.6vw,64px); margin:0 0 20px; font-weight:700; text-shadow:0 8px 36px rgba(0,0,0,.4)}
+    .hero{
+      min-height:100vh; display:flex; align-items:flex-start; padding-top: 20vh; position:relative;
+    }
+    .hero h1{
+      font-size:clamp(28px,5.6vw,64px); margin:0 0 20px; font-weight:700; text-shadow:0 8px 36px rgba(0,0,0,.4)
+    }
     .hero p.sub{font-size:clamp(14px,2.2vw,20px); opacity:.9}
 
-    /* 보트 */
+    /* 보트: 절대 위치 + 부드러운 top 이동 + 페이드/회전 */
     .boat{
-      position:fixed; left:calc(55% + 240px); top:24vh;
-      width:84px; transform:translateX(-50%) rotate(0deg);
+      position:absolute; left:25%; top:65vh;
+      width:180px; transform:translateX(-50%) rotate(0deg);
       transform-origin:center center;
-      transition:opacity 1.5s ease;  /* 초기엔 투명도만 */
+      transition: top .4s ease, opacity 2s ease, transform 2s ease; /* ⬅ top 이동도 부드럽게 */
       filter:drop-shadow(0 12px 30px rgba(0,0,0,.45));
       opacity:0; z-index:10;
     }
     .boat img{width:100%}
 
     /* 섬 */
-    .island{min-height:80vh; display:flex; align-items:center }
+    .island{min-height:80vh; display:flex; align-items:center; justify-content:center}
     .card{
       background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.14);
       padding:30px 40px; border-radius:16px; backdrop-filter:blur(6px);
-      box-shadow:0 10px 40px rgba(0,0,0,.35); 
-      width: min(530px, 100%);           /* 넓은 화면: 560px로 통일 / 좁은 화면: 80%로 축소 */
-      flex: 0 0 min(530px, 100%);        /* flex 아이템이 내용 길이에 맞춰 줄어들지 않도록 고정 */
+      box-shadow:0 10px 40px rgba(0,0,0,.35);
+      width: 560px; min-height:220px; /* 카드 크기 통일 */
+      text-align:center;
     }
-    .chip{display:inline-block; padding:6px 12px; border-radius:999px; font-weight:700;
-      background:rgba(59,209,198,.18); border:1px solid rgba(59,209,198,.4); margin-bottom:10px}
+    .chip{
+      display:inline-block; padding:6px 12px; border-radius:999px; font-weight:700;
+      background:rgba(59,209,198,.18); border:1px solid rgba(59,209,198,.4); margin-bottom:10px
+    }
     .island h2{margin:6px 0 8px; font-size:clamp(22px,4.2vw,36px)}
 
     .isle-mark{
@@ -77,16 +83,18 @@
       border:2px solid rgba(255,255,255,.4);
       box-shadow:0 8px 30px rgba(0,0,0,.35);
       display:flex; align-items:center; justify-content:center;
-      margin-bottom:12px; overflow:hidden;
+      margin:0 auto 12px auto; overflow:hidden;
       opacity:0; transform:translateY(14px);
       transition:opacity .9s ease, transform .9s ease;
     }
     .isle-mark.visible{opacity:1; transform:none}
 
-    .btn{display:inline-block; margin-top:6px;
+    .btn{
+      display:inline-block; margin-top:12px;
       background:linear-gradient(90deg,#3bd1c6,#7ee8de);
       color:#063346; text-decoration:none; font-weight:700;
-      padding:12px 16px; border-radius:12px; box-shadow:0 8px 24px rgba(59,209,198,.25)}
+      padding:12px 16px; border-radius:12px; box-shadow:0 8px 24px rgba(59,209,198,.25)
+    }
     .btn:hover{filter:brightness(1.05)}
 
     .footer{height:16vh}
@@ -112,9 +120,7 @@
   <!-- 섬 1 -->
   <section class="island wrap" id="isle-log">
     <div class="card fade">
-      <div class="isle-mark" id="mark-log">
-        <span style="font-size:30px">🏝️</span>
-      </div>
+      <div class="isle-mark" id="mark-log"><span style="font-size:30px">🏝️</span></div>
       <span class="chip">첫 번째 섬</span>
       <h2>오늘의 기록</h2>
       <p>오늘 실천한 항목을 체크해보세요!</p>
@@ -130,7 +136,7 @@
       <div class="isle-mark" id="mark-board"><span style="font-size:30px">🏝️</span></div>
       <span class="chip">두 번째 섬</span>
       <h2>함대 현황판</h2>
-      <p>반별 평균 달성률을 비교해보아요. <br>모두의 항해가 모여 학교의 항로가 됩니다.</p>
+      <p>반별 평균 달성률을 비교해보아요.<br>모두의 항해가 모여 학교의 항로가 됩니다.</p>
       <a href="board.html" class="btn">현황판 보기</a>
     </div>
   </section>
@@ -150,34 +156,47 @@
     }, {threshold:0.25});
     document.querySelectorAll('.fade, .isle-mark').forEach(n=>io.observe(n));
 
-    // 초기 순차 등장
+    // 초기 순차 등장 (보트 페이드인 + 회전)
     window.addEventListener('load', ()=>{
       const boat = document.getElementById('boat');
       document.getElementById('title').classList.add('visible');
       setTimeout(()=>document.getElementById('subtitle').classList.add('visible'), 300);
 
-      // 보트 1단계: 페이드인
-      setTimeout(()=> {
-        boat.style.opacity = 1;
-      }, 500);
-
-      // 보트 2단계: 회전 (천천히 2초 동안)
-      setTimeout(()=> {
-        boat.style.transition = "transform 2s ease";
-        boat.style.transform = "translateX(-20%) rotate(90deg)";
+      setTimeout(()=> { boat.style.opacity = 1; }, 500);          // 보트 등장
+      setTimeout(()=> {                                           // 아래를 보도록 회전
+        boat.style.transform = "translateX(-50%) rotate(90deg)";
       }, 1500);
     });
 
-    // 스크롤 시 보트 하강
+    // 스크롤 비율에 따라 보트 이동 + 섬 근처에서 멈춤 연출
     window.addEventListener('scroll', ()=>{
       const boat = document.getElementById('boat');
+      const markLog = document.getElementById('mark-log');
+      const markBoard = document.getElementById('mark-board');
+
       const scrollTop = window.scrollY;
       const docHeight = document.body.scrollHeight - window.innerHeight;
-      const pct = scrollTop / docHeight;
-      const minY = window.innerHeight * 0.24;
-      const maxY = window.innerHeight * 0.72;
-      boat.style.top = (minY + (maxY-minY)*pct) + "px";
+      const pct = docHeight > 0 ? (scrollTop / docHeight) : 0;
+
+      // 화면 내 이동 범위
+      const minY = window.innerHeight * 0.30;  // 시작 위치
+      const maxY = window.innerHeight * 0.80;  // 끝 위치
+      let targetY = minY + (maxY - minY) * pct;
+
+      // ⛳ 섬 체크포인트: 해당 구간에선 잠깐 멈춘 듯 고정
+      // 첫 번째 섬 근처 멈춤
+      if (pct > 0.25 && pct < 0.35) {
+        targetY = window.innerHeight * 0.45;
+        markLog && markLog.classList.add('visible'); // 섬 아이콘 노출
+      }
+      // 두 번째 섬 근처 멈춤
+      else if (pct > 0.60 && pct < 0.70) {
+        targetY = window.innerHeight * 0.65;
+        markBoard && markBoard.classList.add('visible');
+      }
+
+      boat.style.top = targetY + "px";
     });
   </script>
 </body>
-</html> 
+</html>
