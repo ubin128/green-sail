@@ -3,23 +3,8 @@ board.html
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <title>현황판</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <h1>반별 현황판 📊</h1>
-  <p>여기에 추후 데이터 시각화를 추가할 예정입니다.</p>
-  <p><a href="index.html">⬅️ 메인으로 돌아가기</a></p>
-</body>
-</html>
-
-<!DOCTYPE html>
-<html lang="ko">
-<head>
   <meta charset="UTF-8" />
   <title>반별 현황판</title>
-  <!-- (선택) 차트 쓰려면 필요 -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body { font-family: system-ui, sans-serif; padding: 24px; }
@@ -29,8 +14,7 @@ board.html
   </style>
 </head>
 <body>
-  <h1>반별 현황판</h1>
-
+  <h1>반별 현황판 📊</h1>
   <div class="actions">
     <button id="addTest">테스트 데이터 추가</button>
     <button id="loadBtn">데이터 불러오기</button>
@@ -41,9 +25,9 @@ board.html
   <h3>로그</h3>
   <div id="log">준비됨…</div>
 
-  <!-- 🔸 firebase.js 모듈 불러오기 -->
+  <!-- 🔸 Firebase 모듈 불러오기 (app-firebase.js가 같은 폴더에 있어야 함) -->
   <script type="module">
-    import { addRecord, getAllRecords } from './firebase.js';
+    import { addRecord, getAllRecords } from './app-firebase-v2.js';
 
     const log = (...args) => {
       const el = document.getElementById('log');
@@ -51,7 +35,6 @@ board.html
       console.log(...args);
     };
 
-    // (선택) 차트 준비
     const ctx = document.getElementById('myChart').getContext('2d');
     const chart = new Chart(ctx, {
       type: 'bar',
@@ -59,38 +42,24 @@ board.html
       options: { responsive: true, scales: { y: { beginAtZero: true } } }
     });
 
-    // 테스트 데이터 추가
     document.getElementById('addTest').addEventListener('click', async () => {
       try {
-        const now = new Date().toISOString().slice(0,10); // "YYYY-MM-DD"
-        await addRecord({
-          date: now,       // 🔺 필드명은 date (data 아님!)
-          class: "2-1",
-          tumbler: 1,
-          lightOff: 1,
-          zeroWaste: 0
-        });
+        const now = new Date().toISOString().slice(0,10);
+        await addRecord({ date: now, class: "2-1", tumbler: 1, lightOff: 1, zeroWaste: 0 });
         log('✅ 테스트 데이터 추가 완료. Firestore 콘솔에서 records 컬렉션 확인하세요.');
-      } catch (e) {
-        log('❌ 추가 실패:', e.message);
-      }
+      } catch (e) { log('❌ 추가 실패:', e.message); }
     });
 
-    // 데이터 불러오기
     document.getElementById('loadBtn').addEventListener('click', async () => {
       try {
         const records = await getAllRecords();
         log('✅ 불러오기 성공. 아래는 records 전체:', records);
-
-        // 차트 업데이트 (라벨: 반, 값: 합계)
         const labels = records.map(r => r.class || r.date);
         const values = records.map(r => (r.tumbler||0) + (r.lightOff||0) + (r.zeroWaste||0));
         chart.data.labels = labels;
         chart.data.datasets[0].data = values;
         chart.update();
-      } catch (e) {
-        log('❌ 불러오기 실패:', e.message);
-      }
+      } catch (e) { log('❌ 불러오기 실패:', e.message); }
     });
   </script>
 </body>
