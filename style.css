@@ -38,19 +38,19 @@ body{
 .fade.visible{opacity:1; transform:none}
 
 /* Hero 영역 */
-.hero1, .hero2{
+.hero1{
   min-height:100vh; display:flex; align-items:flex-start; padding-top:20vh; position:relative;
 }
-.hero1 h1, .hero2 h1{
+.hero1 h1{
   font-size:clamp(28px,5.6vw,64px); margin:0 0 20px; font-weight:700;
   text-shadow:0 8px 36px rgba(0,0,0,.4)
 }
-.hero1 p.sub, .hero2 p.sub{font-size:clamp(14px,2.2vw,20px); opacity:.9}
+.hero1 p.sub{font-size:clamp(14px,2.2vw,20px); opacity:.9}
 
 /* 보트 */
 .boat{
   position:absolute; left:25%; top:70vh;
-  width:200px; transform:translateX(-50%) rotate(0deg);
+  width:11%; transform:translateX(-50%) rotate(0deg);
   transform-origin:center center;
   transition:opacity 2.0s ease;
   filter:drop-shadow(0 12px 30px rgba(0,0,0,.45));
@@ -58,13 +58,18 @@ body{
 }
 .boat img{width:100%}
 
+.spacer{
+  height: 80vh;
+}
+
 /* 섬 */
 .island{min-height:80vh; display:flex; align-items:center }
 .card{
   background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.14);
   padding:30px 40px; border-radius:16px; backdrop-filter:blur(6px);
   box-shadow:0 10px 40px rgba(0,0,0,.35);
-  width: min(530px, 100%);
+  width: 100%;
+ /* width: min(530px, 100%); */
   flex: 0 0 min(530px, 100%);
 }
 .chip{display:inline-block; padding:6px 12px; border-radius:999px; font-weight:700;
@@ -195,4 +200,21 @@ body{
   .card-group {
     flex-direction: column; /* 가로 배치를 세로 배치로 변경 */
   }
+}
+
+
+/* 카드 컨테이너 스타일 */
+.card-container {
+    display: grid; /* 그리드 레이아웃 사용 선언 */
+    grid-template-columns: repeat(3, 1fr); /* 1fr짜리 칸막이를 3개 만듦 (동일한 크기의 3열) */
+    gap: 20px; /* 카드 사이의 간격 */
+}
+
+/* --- 반응형 설정 (모바일 화면) --- */
+/* 화면 너비가 900px 이하가 되면 적용 */
+@media (max-width: 900px) {
+    .card-container {
+        /* 3열 그리드를 1열로 변경하여 세로로 쌓이게 함 */
+        grid-template-columns: 1fr;
+    }
 }
