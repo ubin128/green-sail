@@ -49,7 +49,7 @@ body{
 
 /* 보트 */
 .boat{
-  position:fixed; left:25%; top:70vh;
+  position:absolute; left:25%; top:70vh;
   width:200px; transform:translateX(-50%) rotate(0deg);
   transform-origin:center center;
   transition:opacity 2.0s ease;

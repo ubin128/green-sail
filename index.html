@@ -92,104 +92,156 @@
     <div class="footer"></div>
 
   <script>
-    // 페이드인/아웃
+    // 페이드인/아웃 (기존과 동일)
     const io = new IntersectionObserver((entries)=>{
-      entries.forEach(entry=>{
-        if(entry.isIntersecting){
-          entry.target.classList.add('visible');
-        } else {
-          entry.target.classList.remove('visible');
-        }
-      });
+        entries.forEach(entry=>{
+            if(entry.isIntersecting){
+                entry.target.classList.add('visible');
+            } else {
+                entry.target.classList.remove('visible');
+            }
+        });
     }, {threshold:0.25});
     document.querySelectorAll('.fade, .isle-mark').forEach(n=>io.observe(n));
 
-    // 초기 순차 등장 (Hero1만 타겟)
-    window.addEventListener('load', ()=>{
-      const boat = document.getElementById('boat');
-      const t1   = document.getElementById('hero1-title');
-      const s1   = document.getElementById('hero1-subtitle');
+    // 초기 순차 등장 및 자동 항해 시작
+    window.addEventListener('load', () => {
+        const boat = document.getElementById('boat');
+        const t1 = document.getElementById('hero1-title');
+        const s1 = document.getElementById('hero1-subtitle');
 
-      if (t1) t1.classList.add('visible');
-      if (s1) setTimeout(()=> s1.classList.add('visible'), 300);
+        if (t1) t1.classList.add('visible');
+        if (s1) setTimeout(() => s1.classList.add('visible'), 300);
 
-      // 보트 1단계: 페이드인
-      setTimeout(()=> { boat.style.opacity = 1; }, 500);
+        setTimeout(() => { boat.style.opacity = 1; }, 500);
 
-      // 보트 2단계: 회전 (천천히 2초)
-      setTimeout(()=>{
-        boat.style.transition = "transform 2s ease";
-        boat.style.transform = "translateX(-20%) rotate(90deg)";
-      }, 1500);
+        setTimeout(() => {
+            boat.style.transition = "transform 2s ease";
+            boat.style.transform = "translateX(-20%) translateY(-50%) rotate(90deg)";
+        }, 1500);
+
+        // 자동 항해 애니메이션
+        function startJourney() {
+            const JOURNEY_DURATION = 4000;
+            const TARGET_SECTION_ID = 'isle-log';
+            
+            document.querySelectorAll('.fade, .isle-mark').forEach(el => {
+                el.classList.add('visible');
+            });
+            
+            const targetSection = document.getElementById(TARGET_SECTION_ID);
+            if (!targetSection) return;
+
+            // --- ✨ 점프 현상 해결을 위한 최종 로직 ✨ ---
+            
+            // 1. 현재 보트의 시각적 위치와 높이를 측정합니다.
+            const boatRect = boat.getBoundingClientRect();
+            const initialVisualTop = boatRect.top;
+            const boatHeight = boatRect.height;
+
+            // 2. transform: translateY(-50%) 효과(보트 높이의 절반)를 계산합니다.
+            const transformCorrection = boatHeight / 2;
+
+            // 3. 순수한 CSS top 값으로 변환합니다. (시각적 위치 + 보정값)
+            //    이것이 애니메이션의 진짜 출발점이 됩니다.
+            const startBoatY = initialVisualTop + transformCorrection;
+            
+            // 4. 애니메이션 동안 transform의 Y축 효과를 제거합니다.
+            //    이제 수직 위치는 오직 top 속성만으로 제어됩니다.
+            boat.style.transform = 'translateX(-20%) rotate(90deg)';
+            
+            // 5. 계산된 정확한 출발점으로 보트의 top을 즉시 설정합니다.
+            boat.style.top = startBoatY + 'px';
+
+
+            // --- 애니메이션 루프 시작 ---
+            setTimeout(() => {
+                const startTime = performance.now();
+                const startScrollY = window.scrollY;
+
+                const endScrollY = targetSection.offsetTop - (window.innerHeight / 2) + (targetSection.offsetHeight / 2);
+                const endBoatY = endScrollY + (window.innerHeight / 2);
+                
+                function animate(currentTime) {
+                    const elapsedTime = currentTime - startTime;
+                    let progress = Math.min(elapsedTime / JOURNEY_DURATION, 1);
+                    const easedProgress = 0.5 - 0.5 * Math.cos(progress * Math.PI);
+
+                    const currentBoatY = startBoatY + (endBoatY - startBoatY) * easedProgress;
+                    const currentScrollY = startScrollY + (endScrollY - startScrollY) * easedProgress;
+
+                    boat.style.top = currentBoatY + 'px';
+                    window.scrollTo(0, currentScrollY);
+
+                    if (progress < 1) {
+                        requestAnimationFrame(animate);
+                    }
+                }
+                
+                requestAnimationFrame(animate);
+            }, 0); // 브라우저가 위 변경사항을 반영할 시간을 줍니다.
+        }
+
+        setTimeout(startJourney, 2500);
     });
 
-    // 스크롤 시 보트 하강
-    window.addEventListener('scroll', ()=>{
-      const boat = document.getElementById('boat');
-      const scrollTop = window.scrollY;
-      const docHeight = document.body.scrollHeight - window.innerHeight;
-      const pct = docHeight > 0 ? (scrollTop / docHeight) : 0;
-      const minY = window.innerHeight * 0.70;
-      const maxY = window.innerHeight * 0.95;
-      boat.style.top = (minY + (maxY - minY) * pct) + "px";
-    });
 
     // Eco HUD 동작
     (function(){
-      const hud = document.getElementById('ecoHud');
-      const co2Num = document.getElementById('co2Num');
-      const ring = document.getElementById('ringProg');
-      const ringTxt = document.getElementById('ringTxt');
-      const tipBox = document.getElementById('tipBox');
+        const hud = document.getElementById('ecoHud');
+        const co2Num = document.getElementById('co2Num');
+        const ring = document.getElementById('ringProg');
+        const ringTxt = document.getElementById('ringTxt');
+        const tipBox = document.getElementById('tipBox');
 
-      const todayKey = new Date().toISOString().slice(0,10) + '_gs_saved';
-      const saved = parseFloat(localStorage.getItem('gs_saved_kg_today') || localStorage.getItem(todayKey) || '0') || 0;
+        const todayKey = new Date().toISOString().slice(0,10) + '_gs_saved';
+        const saved = parseFloat(localStorage.getItem('gs_saved_kg_today') || localStorage.getItem(todayKey) || '0') || 0;
 
-      const GOAL = 20;
+        const GOAL = 20;
 
-      function animateValue(el, start, end, dur){
-        const st = performance.now();
-        function f(now){
-          const t = Math.min(1, (now - st)/dur);
-          const eased = t < .5 ? 2*t*t : 1 - Math.pow(-2*t+2,2)/2;
-          el.textContent = (start + (end - start) * eased).toFixed(2);
-          if(t < 1) requestAnimationFrame(f);
+        function animateValue(el, start, end, dur){
+            const st = performance.now();
+            function f(now){
+                const t = Math.min(1, (now - st)/dur);
+                const eased = t < .5 ? 2*t*t : 1 - Math.pow(-2*t+2,2)/2;
+                el.textContent = (start + (end - start) * eased).toFixed(2);
+                if(t < 1) requestAnimationFrame(f);
+            }
+            requestAnimationFrame(f);
         }
-        requestAnimationFrame(f);
-      }
-      animateValue(co2Num, 0, saved, 900);
+        animateValue(co2Num, 0, saved, 900);
 
-      const C = 2*Math.PI*36;
-      const pct = Math.max(0, Math.min(100, Math.round(saved/GOAL*100)));
-      ring.style.strokeDasharray = C;
-      ring.style.strokeDashoffset = C;
-      requestAnimationFrame(()=>{
-        ring.style.transition = 'stroke-dashoffset .9s ease';
-        ring.style.strokeDashoffset = C * (1 - pct/100);
-        ringTxt.textContent = pct + '%';
-      });
+        const C = 2*Math.PI*36;
+        const pct = Math.max(0, Math.min(100, Math.round(saved/GOAL*100)));
+        ring.style.strokeDasharray = C;
+        ring.style.strokeDashoffset = C;
+        requestAnimationFrame(()=>{
+            ring.style.transition = 'stroke-dashoffset .9s ease';
+            ring.style.strokeDashoffset = C * (1 - pct/100);
+            ringTxt.textContent = pct + '%';
+        });
 
-      const tips = [
-        '물 끓일 땐 뚜껑! 가스·전기 절감 효과 👍',
-        '엘리베이터 대신 계단 오르면 CO₂와 건강 동시 케어',
-        '분리수거 전, 페트병 라벨 제거 & 압축 시 재활용률 ↑',
-        '충전 끝난 어댑터 뽑기_ 대기전력도 전기예요 ⚡',
-        '텀블러/머그 사용은 일회용 절감! => 지구에 +1',
-        '가까운 거리는 도보/자전거! 탄소도 줄고 기분도 상쾌 🚴'
-      ];
-      let tipIdx = Math.floor(Math.random()*tips.length);
-      function nextTip(){
-        tipIdx = (tipIdx+1) % tips.length;
-        tipBox.style.opacity = .2;
-        setTimeout(()=>{
-          tipBox.innerHTML = '<strong>Tip:</strong> ' + tips[tipIdx];
-          tipBox.style.opacity = 1;
-        }, 250);
-      }
-      setInterval(nextTip, 6000);
+        const tips = [
+            '물 끓일 땐 뚜껑! 가스·전기 절감 효과 👍',
+            '엘리베이터 대신 계단 오르면 CO₂와 건강 동시 케어',
+            '분리수거 전, 페트병 라벨 제거 & 압축 시 재활용률 ↑',
+            '충전 끝난 어댑터 뽑기_ 대기전력도 전기예요 ⚡',
+            '텀블러/머그 사용은 일회용 절감! => 지구에 +1',
+            '가까운 거리는 도보/자전거! 탄소도 줄고 기분도 상쾌 🚴'
+        ];
+        let tipIdx = Math.floor(Math.random()*tips.length);
+        function nextTip(){
+            tipIdx = (tipIdx+1) % tips.length;
+            tipBox.style.opacity = .2;
+            setTimeout(()=>{
+                tipBox.innerHTML = '<strong>Tip:</strong> ' + tips[tipIdx];
+                tipBox.style.opacity = 1;
+            }, 250);
+        }
+        setInterval(nextTip, 6000);
 
-      if(hud) setTimeout(()=>hud.classList.add('visible'), 400);
+        if(hud) setTimeout(()=>hud.classList.add('visible'), 400);
     })();
-  </script>
+</script>
 </body>
 </html>
