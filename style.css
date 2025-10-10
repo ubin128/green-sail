@@ -98,12 +98,12 @@ body{
 /* === Eco HUD === */
 .eco-hud{
   /* position:absolute; right:20px; bottom:8vh; */
-  width:100%;
+  /* width:100%;
   background:var(--glass);
   border:1px solid rgba(255,255,255,.14);
   border-radius:16px; backdrop-filter:blur(6px);
   box-shadow:0 10px 40px rgba(0,0,0,.35);
-  padding:16px 16px 14px; color:var(--ink);
+  padding:16px 16px 14px; */ color:var(--ink);
 }
 .eco-top{display:flex; gap:14px; align-items:center; margin-bottom:10px}
 .eco-icon{width:42px; height:42px; border-radius:12px;
@@ -126,3 +126,73 @@ body{
 /* @media (max-width:720px){
   .eco-hud{position:static; margin:10px 0 0}
 } */
+
+/* ====== Board page (리더보드/표/프로그레스) ====== */
+.board-header {
+  display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:10px;
+}
+.kpi {
+  display:flex; gap:10px; flex-wrap:wrap;
+}
+.kpi .pill {
+  background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.14);
+  padding:8px 12px; border-radius:999px; font-weight:800;
+}
+
+.table {
+  width:100%; border-collapse:collapse; margin-top:8px;
+  background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.1); border-radius:12px; overflow:hidden;
+}
+.table thead th {
+  text-align:left; padding:12px 10px; font-weight:900; letter-spacing:-.01em;
+  background:rgba(255,255,255,.06); border-bottom:1px solid rgba(255,255,255,.12);
+}
+.table tbody td {
+  padding:12px 10px; border-bottom:1px solid rgba(255,255,255,.08);
+}
+.table tbody tr:last-child td { border-bottom:none; }
+.rank {
+  width:40px; text-align:center; font-weight:900;
+}
+.badge {
+  display:inline-block; padding:4px 8px; border-radius:999px; font-weight:800;
+  background:rgba(59,209,198,.15); border:1px solid rgba(59,209,198,.35);
+}
+
+/* 진행바(달성률) */
+.progress {
+  height:10px; width:160px; background:rgba(255,255,255,.12); border-radius:999px; overflow:hidden;
+  border:1px solid rgba(255,255,255,.14);
+}
+.progress > span {
+  display:block; height:100%; width:0%;
+  background:linear-gradient(90deg,#3bd1c6,#7ee8de);
+  transition:width .6s ease;
+}
+
+/* 반응형 */
+@media (max-width:720px){
+  .progress{ width:120px; }
+}
+
+
+/* 카드 그룹을 위한 스타일 */
+.card-group {
+  display: flex;          /* 자식 요소(카드들)를 가로로 배치 */
+  gap: 20px;              /* 카드와 카드 사이에 20px 간격 추가 */
+  align-items: stretch;   /* 카드들의 높이를 동일하게 맞춰줌 */
+}
+
+/* 카드 그룹 안의 자식 요소들이 공간을 나눠 갖도록 설정 */
+.card-group > .card {
+  flex: 1; /* 모든 카드가 1:1 비율로 공간을 균등하게 차지 */
+}
+
+
+/* --- 반응형 설정 --- */
+/* 화면 너비가 720px 이하일 때 (모바일 화면) */
+@media (max-width: 720px) {
+  .card-group {
+    flex-direction: column; /* 가로 배치를 세로 배치로 변경 */
+  }
+}
