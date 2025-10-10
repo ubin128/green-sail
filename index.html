@@ -42,39 +42,38 @@
     .fade{opacity:0; transform:translateY(16px); transition:opacity 1s ease, transform 1s ease}
     .fade.visible{opacity:1; transform:none}
 
-    /* Hero */
-    .hero{
-      min-height:100vh; display:flex; align-items:flex-start; padding-top: 20vh; position:relative;
-    }
-    .hero h1{
-      font-size:clamp(28px,5.6vw,64px); margin:0 0 20px; font-weight:700; text-shadow:0 8px 36px rgba(0,0,0,.4)
-    }
-    .hero p.sub{font-size:clamp(14px,2.2vw,20px); opacity:.9}
+    /* Hero1 */
+    .hero1{min-height:100vh; display:flex; align-items:flex-start; padding-top: 20vh; position:relative; }
+    .hero1 h1{font-size:clamp(28px,5.6vw,64px); margin:0 0 20px; font-weight:700; text-shadow:0 8px 36px rgba(0,0,0,.4)}
+    .hero1 p.sub{font-size:clamp(14px,2.2vw,20px); opacity:.9}
 
-    /* 보트: 절대 위치 + 부드러운 top 이동 + 페이드/회전 */
+    /* 보트 */
     .boat{
-      position:absolute; left:25%; top:65vh;
-      width:180px; transform:translateX(-50%) rotate(0deg);
+      position:fixed; left:calc(25%); top:70vh;
+      width:200px; transform:translateX(-50%) rotate(0deg);
       transform-origin:center center;
-      transition: top .4s ease, opacity 2s ease, transform 2s ease; /* ⬅ top 이동도 부드럽게 */
+      transition:opacity 2.0s ease;  /* 초기엔 투명도만 */
       filter:drop-shadow(0 12px 30px rgba(0,0,0,.45));
       opacity:0; z-index:10;
     }
     .boat img{width:100%}
 
+    /* Hero2 */
+    .hero2{min-height:100vh; display:flex; align-items:flex-start; padding-top: 20vh; position:relative; }
+    .hero2 h1{font-size:clamp(28px,5.6vw,64px); margin:0 0 20px; font-weight:700; text-shadow:0 8px 36px rgba(0,0,0,.4)}
+    .hero2 p.sub{font-size:clamp(14px,2.2vw,20px); opacity:.9}
+
     /* 섬 */
-    .island{min-height:80vh; display:flex; align-items:center; justify-content:center}
+    .island{min-height:80vh; display:flex; align-items:center }
     .card{
       background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.14);
       padding:30px 40px; border-radius:16px; backdrop-filter:blur(6px);
-      box-shadow:0 10px 40px rgba(0,0,0,.35);
-      width: 560px; min-height:220px; /* 카드 크기 통일 */
-      text-align:center;
+      box-shadow:0 10px 40px rgba(0,0,0,.35); 
+      width: min(530px, 100%);
+      flex: 0 0 min(530px, 100%);
     }
-    .chip{
-      display:inline-block; padding:6px 12px; border-radius:999px; font-weight:700;
-      background:rgba(59,209,198,.18); border:1px solid rgba(59,209,198,.4); margin-bottom:10px
-    }
+    .chip{display:inline-block; padding:6px 12px; border-radius:999px; font-weight:700;
+      background:rgba(59,209,198,.18); border:1px solid rgba(59,209,198,.4); margin-bottom:10px}
     .island h2{margin:6px 0 8px; font-size:clamp(22px,4.2vw,36px)}
 
     .isle-mark{
@@ -83,27 +82,57 @@
       border:2px solid rgba(255,255,255,.4);
       box-shadow:0 8px 30px rgba(0,0,0,.35);
       display:flex; align-items:center; justify-content:center;
-      margin:0 auto 12px auto; overflow:hidden;
+      margin-bottom:12px; overflow:hidden;
       opacity:0; transform:translateY(14px);
       transition:opacity .9s ease, transform .9s ease;
     }
     .isle-mark.visible{opacity:1; transform:none}
 
-    .btn{
-      display:inline-block; margin-top:12px;
+    .btn{display:inline-block; margin-top:6px;
       background:linear-gradient(90deg,#3bd1c6,#7ee8de);
       color:#063346; text-decoration:none; font-weight:700;
-      padding:12px 16px; border-radius:12px; box-shadow:0 8px 24px rgba(59,209,198,.25)
-    }
+      padding:12px 16px; border-radius:12px; box-shadow:0 8px 24px rgba(59,209,198,.25)}
     .btn:hover{filter:brightness(1.05)}
 
     .footer{height:16vh}
+
+    /* === Eco HUD (탄소/SDGs/팁) === */
+    .eco-hud{
+      position:absolute; right:20px; bottom:8vh;
+      width:min(420px, 92vw);
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.14);
+      border-radius:16px; backdrop-filter:blur(6px);
+      box-shadow:0 10px 40px rgba(0,0,0,.35);
+      padding:16px 16px 14px; color:var(--ink);
+    }
+    .eco-top{display:flex; gap:14px; align-items:center; margin-bottom:10px}
+    .eco-icon{width:42px; height:42px; border-radius:12px;
+      display:flex; align-items:center; justify-content:center;
+      background:linear-gradient(180deg,#9efac6,#47c58f); font-size:22px; box-shadow:0 6px 24px rgba(0,0,0,.25)}
+    .eco-title{font-weight:800; font-size:16px; letter-spacing:-.02em}
+    .eco-metric{display:flex; align-items:baseline; gap:8px}
+    .eco-num{font-size:28px; font-weight:900}
+    .eco-unit{opacity:.8; font-weight:700}
+
+    .ring{position:relative; width:84px; height:84px}
+    .ring svg{transform:rotate(-90deg)}
+    .ring .txt{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px}
+
+    .eco-row{display:flex; gap:14px; flex-wrap:wrap; margin-top:8px}
+    .chip-sdgs{padding:6px 10px; border:1px solid #3bd1c666; border-radius:999px; font-weight:800; background:rgba(59,209,198,.15)}
+    .tip{margin-top:6px; font-size:14px; opacity:.92}
+    .tip small{opacity:.75}
+
+    @media (max-width:720px){
+      .eco-hud{position:static; margin:10px 0 0}
+    }
   </style>
 </head>
 <body>
 
-  <!-- Hero -->
-  <section class="hero wrap">
+  <!-- Hero1 -->
+  <section class="hero1 wrap">
     <div>
       <h1 class="fade" id="title"><span style="color:#3bd1c6">작은 습관</span>이<br>우리의 항로를 바꾼다</h1>
       <p class="sub fade" id="subtitle">친환경 실천이 모이면, 우리 반의 항로가 보입니다.<br>아래로 스크롤해 항해를 시작하세요.</p>
@@ -117,10 +146,20 @@
 
   <div class="spacer"></div>
 
+  <!-- Hero2 -->
+   <section class="hero2 wrap">
+    <div>
+      <h1 class="fade" id="title"> 친환경 소개글...</h1>
+      <p class="sub fade" id="subtitle">어쩌구저쩌구 아 하기싫다 진짜<br>ㅗㅗㅗㅗㅗㅗㅗㅗㅗㅗㅗㅗㅗㅗㅗㅗㅗㅗㅗ<br>ㅗㅗㅗㅗㅗㅗㅗㅗㅗㅗㅗㅗㅗㅗㅗㅗㅗ</p>
+    </div>
+   </section>
+
   <!-- 섬 1 -->
   <section class="island wrap" id="isle-log">
     <div class="card fade">
-      <div class="isle-mark" id="mark-log"><span style="font-size:30px">🏝️</span></div>
+      <div class="isle-mark" id="mark-log">
+        <span style="font-size:30px">🏝️</span>
+      </div>
       <span class="chip">첫 번째 섬</span>
       <h2>오늘의 기록</h2>
       <p>오늘 실천한 항목을 체크해보세요!</p>
@@ -136,10 +175,43 @@
       <div class="isle-mark" id="mark-board"><span style="font-size:30px">🏝️</span></div>
       <span class="chip">두 번째 섬</span>
       <h2>함대 현황판</h2>
-      <p>반별 평균 달성률을 비교해보아요.<br>모두의 항해가 모여 학교의 항로가 됩니다.</p>
+      <p>반별 평균 달성률을 비교해보아요. <br>모두의 항해가 모여 학교의 항로가 됩니다.</p>
       <a href="board.html" class="btn">현황판 보기</a>
     </div>
   </section>
+
+    <!-- Eco HUD: 첫 화면 정보 박스 -->
+    <div class="eco-hud fade" id="ecoHud">
+      <div class="eco-top">
+        <div class="eco-icon">🌿</div>
+        <div>
+          <div class="eco-title">오늘 우리 학교가 줄인 탄소</div>
+          <div class="eco-metric"><span id="co2Num" class="eco-num">0.0</span><span class="eco-unit">kg CO₂</span></div>
+        </div>
+        <div class="ring" style="margin-left:auto">
+          <svg width="84" height="84">
+            <circle cx="42" cy="42" r="36" fill="none" stroke="rgba(255,255,255,.15)" stroke-width="10"/>
+            <circle id="ringProg" cx="42" cy="42" r="36" fill="none"
+                    stroke="#3bd1c6" stroke-width="10" stroke-linecap="round"
+                    stroke-dasharray="226.2" stroke-dashoffset="226.2"/>
+          </svg>
+          <div class="txt" id="ringTxt">0%</div>
+        </div>
+      </div>
+
+      <div class="tip" id="tipBox">
+        <strong>Tip:</strong> 물 끓일 땐 뚜껑을! 가스·전기 절감 효과 👍
+      </div>
+
+      <div class="eco-row">
+        <span class="chip-sdgs"># SDGs 12 지속가능한 소비</span>
+        <span class="chip-sdgs"># SDGs 13 기후행동</span>
+        <span class="chip-sdgs"># 에너지 절약 ⚡</span>
+        <span class="chip-sdgs"># 일회용 줄이기 🥤</span>
+      </div>
+
+      
+    </div>
 
   <div class="footer"></div>
 
@@ -156,47 +228,95 @@
     }, {threshold:0.25});
     document.querySelectorAll('.fade, .isle-mark').forEach(n=>io.observe(n));
 
-    // 초기 순차 등장 (보트 페이드인 + 회전)
+    // 초기 순차 등장
     window.addEventListener('load', ()=>{
       const boat = document.getElementById('boat');
       document.getElementById('title').classList.add('visible');
       setTimeout(()=>document.getElementById('subtitle').classList.add('visible'), 300);
 
-      setTimeout(()=> { boat.style.opacity = 1; }, 500);          // 보트 등장
-      setTimeout(()=> {                                           // 아래를 보도록 회전
-        boat.style.transform = "translateX(-50%) rotate(90deg)";
+      // 보트 1단계: 페이드인
+      setTimeout(()=> { boat.style.opacity = 1; }, 500);
+
+      // 보트 2단계: 회전 (천천히 2초)
+      setTimeout(()=> {
+        boat.style.transition = "transform 2s ease";
+        boat.style.transform = "translateX(-20%) rotate(90deg)";
       }, 1500);
     });
 
-    // 스크롤 비율에 따라 보트 이동 + 섬 근처에서 멈춤 연출
+    // 스크롤 시 보트 하강
     window.addEventListener('scroll', ()=>{
       const boat = document.getElementById('boat');
-      const markLog = document.getElementById('mark-log');
-      const markBoard = document.getElementById('mark-board');
-
       const scrollTop = window.scrollY;
       const docHeight = document.body.scrollHeight - window.innerHeight;
-      const pct = docHeight > 0 ? (scrollTop / docHeight) : 0;
-
-      // 화면 내 이동 범위
-      const minY = window.innerHeight * 0.30;  // 시작 위치
-      const maxY = window.innerHeight * 0.80;  // 끝 위치
-      let targetY = minY + (maxY - minY) * pct;
-
-      // ⛳ 섬 체크포인트: 해당 구간에선 잠깐 멈춘 듯 고정
-      // 첫 번째 섬 근처 멈춤
-      if (pct > 0.25 && pct < 0.35) {
-        targetY = window.innerHeight * 0.45;
-        markLog && markLog.classList.add('visible'); // 섬 아이콘 노출
-      }
-      // 두 번째 섬 근처 멈춤
-      else if (pct > 0.60 && pct < 0.70) {
-        targetY = window.innerHeight * 0.65;
-        markBoard && markBoard.classList.add('visible');
-      }
-
-      boat.style.top = targetY + "px";
+      const pct = scrollTop / docHeight;
+      const minY = window.innerHeight * 0.24;
+      const maxY = window.innerHeight * 0.72;
+      boat.style.top = (minY + (maxY-minY)*pct) + "px";
     });
+
+    /* === Eco HUD 동작: 숫자 카운트, 도넛, 팁 롤링 === */
+    (function(){
+      const hud = document.getElementById('ecoHud');
+      const co2Num = document.getElementById('co2Num');
+      const ring = document.getElementById('ringProg');
+      const ringTxt = document.getElementById('ringTxt');
+      const tipBox = document.getElementById('tipBox');
+
+      // 오늘 절감량 (log.html에서 localStorage에 저장한다고 가정)
+      const todayKey = new Date().toISOString().slice(0,10) + '_gs_saved';
+      const saved = parseFloat(localStorage.getItem('gs_saved_kg_today') || localStorage.getItem(todayKey) || '0') || 0;
+
+      // 목표치: 20kg (원하면 조정)
+      const GOAL = 20;
+
+      function animateValue(el, start, end, dur){
+        const st = performance.now();
+        function f(now){
+          const t = Math.min(1, (now - st)/dur);
+          const eased = t<.5 ? 2*t*t : 1 - Math.pow(-2*t+2,2)/2;
+          const val = start + (end-start)*eased;
+          el.textContent = val.toFixed(1);
+          if(t<1) requestAnimationFrame(f);
+        }
+        requestAnimationFrame(f);
+      }
+      animateValue(co2Num, 0, saved, 900);
+
+      // 도넛 진행
+      const C = 2*Math.PI*36; // 둘레 ≈226.2
+      const pct = Math.max(0, Math.min(100, Math.round(saved/GOAL*100)));
+      ring.style.strokeDasharray = C;
+      ring.style.strokeDashoffset = C;
+      requestAnimationFrame(()=>{
+        ring.style.transition = 'stroke-dashoffset .9s ease';
+        ring.style.strokeDashoffset = C * (1 - pct/100);
+        ringTxt.textContent = pct + '%';
+      });
+
+      // 팁 롤링
+      const tips = [
+        '물 끓일 땐 뚜껑! 가스·전기 절감 효과 👍',
+        '엘리베이터 대신 계단 오르면 CO₂와 건강 동시 케어',
+        '분리수거 전, 페트병 라벨 제거 & 압축 시 재활용률 ↑',
+        '충전 끝난 어댑터 뽑기_ 대기전력도 전기예요 ⚡',
+        '텀블러/머그 사용은 일회용 절감! => 지구에 +1',
+        '가까운 거리는 도보/자전거! 탄소도 줄고 기분도 상쾌 🚴'
+      ];
+      let tipIdx = Math.floor(Math.random()*tips.length);
+      function nextTip(){
+        tipIdx = (tipIdx+1) % tips.length;
+        tipBox.style.opacity = .2;
+        setTimeout(()=>{
+          tipBox.innerHTML = '<strong>Tip:</strong> ' + tips[tipIdx];
+          tipBox.style.opacity = 1;
+        }, 250);
+      }
+      setInterval(nextTip, 6000);
+
+      // HUD 페이드인
+      if(hud) setTimeout(()=>hud.classList.add('visible'), 400);
+    })();
   </script>
 </body>
 </html>
