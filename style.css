@@ -1,21 +1,128 @@
-body {
-  font-family: Arial, sans-serif;
-  background: #e6f7ff;
-  text-align: center;
-  padding: 40px;
+/* ✅ 공통 폰트 */
+@font-face{
+  font-family:'NanumSquare';
+  src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2107@1.1/NanumSquare-Regular.woff') format('woff');
+  font-weight:400; font-style:normal;
 }
-h1 {
-  color: #000000;
+@font-face{
+  font-family:'NanumSquare';
+  src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2107@1.1/NanumSquare-Bold.woff') format('woff');
+  font-weight:700; font-style:normal;
 }
-a {
-  display: inline-block;
-  margin: 10px;
-  padding: 10px 20px;
-  text-decoration: none;
-  background: #38b2ac;
-  color: white;
-  border-radius: 8px;
+
+/* === 컬러 변수 === */
+:root{
+  --deep1:#041421;
+  --deep2:#062238;
+  --deep3:#0a2f4e;
+  --ink:#eaf6ff;
+  --accent:#3bd1c6;
+  --glass:rgba(255,255,255,.06);
 }
-a:hover {
-  background: #2c7a7b;
+
+*{box-sizing:border-box}
+body{
+  margin:0; font-family:'NanumSquare', sans-serif; color:var(--ink);
+  background: radial-gradient(120% 90% at 50% 0%, var(--deep2), var(--deep1) 50%) fixed,
+              linear-gradient(180deg, var(--deep1), var(--deep3)) fixed;
+  overflow-x:hidden;
+  min-height:100vh;
 }
+
+/* 공통 레이아웃 */
+.wrap{max-width:1100px; margin:0 auto; padding:0 20px}
+.spacer{height:14vh}
+
+/* 페이드인 애니메이션 */
+.fade{opacity:0; transform:translateY(16px); transition:opacity 1s ease, transform 1s ease}
+.fade.visible{opacity:1; transform:none}
+
+/* Hero 영역 */
+.hero1, .hero2{
+  min-height:100vh; display:flex; align-items:flex-start; padding-top:20vh; position:relative;
+}
+.hero1 h1, .hero2 h1{
+  font-size:clamp(28px,5.6vw,64px); margin:0 0 20px; font-weight:700;
+  text-shadow:0 8px 36px rgba(0,0,0,.4)
+}
+.hero1 p.sub, .hero2 p.sub{font-size:clamp(14px,2.2vw,20px); opacity:.9}
+
+/* 보트 */
+.boat{
+  position:fixed; left:25%; top:70vh;
+  width:200px; transform:translateX(-50%) rotate(0deg);
+  transform-origin:center center;
+  transition:opacity 2.0s ease;
+  filter:drop-shadow(0 12px 30px rgba(0,0,0,.45));
+  opacity:0; z-index:10;
+}
+.boat img{width:100%}
+
+/* 섬 */
+.island{min-height:80vh; display:flex; align-items:center }
+.card{
+  background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.14);
+  padding:30px 40px; border-radius:16px; backdrop-filter:blur(6px);
+  box-shadow:0 10px 40px rgba(0,0,0,.35);
+  width: min(530px, 100%);
+  flex: 0 0 min(530px, 100%);
+}
+.chip{display:inline-block; padding:6px 12px; border-radius:999px; font-weight:700;
+  background:rgba(59,209,198,.18); border:1px solid rgba(59,209,198,.4); margin-bottom:10px}
+.island h2{margin:6px 0 8px; font-size:clamp(22px,4.2vw,36px)}
+
+.isle-mark{
+  width:92px; height:92px; border-radius:18px;
+  background:linear-gradient(180deg,#99f2c8,#1f8a70);
+  border:2px solid rgba(255,255,255,.4);
+  box-shadow:0 8px 30px rgba(0,0,0,.35);
+  display:flex; align-items:center; justify-content:center;
+  margin-bottom:12px; overflow:hidden;
+  opacity:0; transform:translateY(14px);
+  transition:opacity .9s ease, transform .9s ease;
+}
+.isle-mark.visible{opacity:1; transform:none}
+
+/* 버튼 */
+.btn{
+  display:inline-block; margin-top:6px;
+  background:linear-gradient(90deg,#3bd1c6,#7ee8de);
+  color:#063346; text-decoration:none; font-weight:700;
+  padding:12px 16px; border-radius:12px; box-shadow:0 8px 24px rgba(59,209,198,.25)
+}
+.btn:hover{filter:brightness(1.05)}
+
+/* Footer */
+.footer{height:16vh}
+
+/* === Eco HUD === */
+.eco-hud{
+  /* position:absolute; right:20px; bottom:8vh; */
+  width:100%;
+  background:var(--glass);
+  border:1px solid rgba(255,255,255,.14);
+  border-radius:16px; backdrop-filter:blur(6px);
+  box-shadow:0 10px 40px rgba(0,0,0,.35);
+  padding:16px 16px 14px; color:var(--ink);
+}
+.eco-top{display:flex; gap:14px; align-items:center; margin-bottom:10px}
+.eco-icon{width:42px; height:42px; border-radius:12px;
+  display:flex; align-items:center; justify-content:center;
+  background:linear-gradient(180deg,#9efac6,#47c58f); font-size:22px; box-shadow:0 6px 24px rgba(0,0,0,.25)}
+.eco-title{font-weight:800; font-size:16px; letter-spacing:-.02em}
+.eco-metric{display:flex; align-items:baseline; gap:8px}
+.eco-num{font-size:28px; font-weight:900}
+.eco-unit{opacity:.8; font-weight:700}
+
+.ring{position:relative; width:84px; height:84px}
+.ring svg{transform:rotate(-90deg)}
+.ring .txt{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px}
+
+.eco-row{display:flex; gap:14px; flex-wrap:wrap; margin-top:8px}
+.chip-sdgs{padding:6px 10px; border:1px solid #3bd1c666; border-radius:999px; font-weight:800; background:rgba(59,209,198,.15)}
+.tip{margin-top:6px; font-size:14px; opacity:.92}
+.tip small{opacity:.75}
+
+/* @media (max-width:720px){
+  .eco-hud{position:static; margin:10px 0 0}
+} */

@@ -4,138 +4,16 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>친환경 생활 습관 챌린지</title>
-
-  <!-- ✅ 나눔스퀘어 폰트 -->
-  <style>
-    @font-face{
-      font-family:'NanumSquare';
-      src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2107@1.1/NanumSquare-Regular.woff') format('woff');
-      font-weight:400; font-style:normal;
-    }
-    @font-face{
-      font-family:'NanumSquare';
-      src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2107@1.1/NanumSquare-Bold.woff') format('woff');
-      font-weight:700; font-style:normal;
-    }
-  </style>
-
-  <style>
-    :root{
-      --deep1:#041421;
-      --deep2:#062238;
-      --deep3:#0a2f4e;
-      --ink:#eaf6ff;
-      --accent:#3bd1c6;
-    }
-    *{box-sizing:border-box}
-    body{
-      margin:0; font-family:'NanumSquare', sans-serif; color:var(--ink);
-      background: radial-gradient(120% 90% at 50% 0%, var(--deep2), var(--deep1) 50%) fixed,
-                  linear-gradient(180deg, var(--deep1), var(--deep3)) fixed;
-      overflow-x:hidden;
-    }
-
-    .wrap{max-width:1100px; margin:0 auto; padding:0 20px}
-    .spacer{height:14vh}
-
-    /* 페이드인 */
-    .fade{opacity:0; transform:translateY(16px); transition:opacity 1s ease, transform 1s ease}
-    .fade.visible{opacity:1; transform:none}
-
-    /* Hero1 */
-    .hero1{min-height:100vh; display:flex; align-items:flex-start; padding-top: 20vh; position:relative; }
-    .hero1 h1{font-size:clamp(28px,5.6vw,64px); margin:0 0 20px; font-weight:700; text-shadow:0 8px 36px rgba(0,0,0,.4)}
-    .hero1 p.sub{font-size:clamp(14px,2.2vw,20px); opacity:.9}
-
-    /* 보트 */
-    .boat{
-      position:fixed; left:calc(25%); top:70vh;
-      width:200px; transform:translateX(-50%) rotate(0deg);
-      transform-origin:center center;
-      transition:opacity 2.0s ease;  /* 초기엔 투명도만 */
-      filter:drop-shadow(0 12px 30px rgba(0,0,0,.45));
-      opacity:0; z-index:10;
-    }
-    .boat img{width:100%}
-
-    /* Hero2 */
-    .hero2{min-height:100vh; display:flex; align-items:flex-start; padding-top: 20vh; position:relative; }
-    .hero2 h1{font-size:clamp(28px,5.6vw,64px); margin:0 0 20px; font-weight:700; text-shadow:0 8px 36px rgba(0,0,0,.4)}
-    .hero2 p.sub{font-size:clamp(14px,2.2vw,20px); opacity:.9}
-
-    /* 섬 */
-    .island{min-height:80vh; display:flex; align-items:center }
-    .card{
-      background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.14);
-      padding:30px 40px; border-radius:16px; backdrop-filter:blur(6px);
-      box-shadow:0 10px 40px rgba(0,0,0,.35); 
-      width: min(530px, 100%);
-      flex: 0 0 min(530px, 100%);
-    }
-    .chip{display:inline-block; padding:6px 12px; border-radius:999px; font-weight:700;
-      background:rgba(59,209,198,.18); border:1px solid rgba(59,209,198,.4); margin-bottom:10px}
-    .island h2{margin:6px 0 8px; font-size:clamp(22px,4.2vw,36px)}
-
-    .isle-mark{
-      width:92px; height:92px; border-radius:18px;
-      background:linear-gradient(180deg,#99f2c8,#1f8a70);
-      border:2px solid rgba(255,255,255,.4);
-      box-shadow:0 8px 30px rgba(0,0,0,.35);
-      display:flex; align-items:center; justify-content:center;
-      margin-bottom:12px; overflow:hidden;
-      opacity:0; transform:translateY(14px);
-      transition:opacity .9s ease, transform .9s ease;
-    }
-    .isle-mark.visible{opacity:1; transform:none}
-
-    .btn{display:inline-block; margin-top:6px;
-      background:linear-gradient(90deg,#3bd1c6,#7ee8de);
-      color:#063346; text-decoration:none; font-weight:700;
-      padding:12px 16px; border-radius:12px; box-shadow:0 8px 24px rgba(59,209,198,.25)}
-    .btn:hover{filter:brightness(1.05)}
-
-    .footer{height:16vh}
-
-    /* === Eco HUD (탄소/SDGs/팁) === */
-    .eco-hud{
-      position:absolute; right:20px; bottom:8vh;
-      width:min(420px, 92vw);
-      background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.14);
-      border-radius:16px; backdrop-filter:blur(6px);
-      box-shadow:0 10px 40px rgba(0,0,0,.35);
-      padding:16px 16px 14px; color:var(--ink);
-    }
-    .eco-top{display:flex; gap:14px; align-items:center; margin-bottom:10px}
-    .eco-icon{width:42px; height:42px; border-radius:12px;
-      display:flex; align-items:center; justify-content:center;
-      background:linear-gradient(180deg,#9efac6,#47c58f); font-size:22px; box-shadow:0 6px 24px rgba(0,0,0,.25)}
-    .eco-title{font-weight:800; font-size:16px; letter-spacing:-.02em}
-    .eco-metric{display:flex; align-items:baseline; gap:8px}
-    .eco-num{font-size:28px; font-weight:900}
-    .eco-unit{opacity:.8; font-weight:700}
-
-    .ring{position:relative; width:84px; height:84px}
-    .ring svg{transform:rotate(-90deg)}
-    .ring .txt{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px}
-
-    .eco-row{display:flex; gap:14px; flex-wrap:wrap; margin-top:8px}
-    .chip-sdgs{padding:6px 10px; border:1px solid #3bd1c666; border-radius:999px; font-weight:800; background:rgba(59,209,198,.15)}
-    .tip{margin-top:6px; font-size:14px; opacity:.92}
-    .tip small{opacity:.75}
-
-    @media (max-width:720px){
-      .eco-hud{position:static; margin:10px 0 0}
-    }
-  </style>
+  <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
   <!-- Hero1 -->
   <section class="hero1 wrap">
     <div>
-      <h1 class="fade" id="title"><span style="color:#3bd1c6">작은 습관</span>이<br>우리의 항로를 바꾼다</h1>
-      <p class="sub fade" id="subtitle">친환경 실천이 모이면, 우리 반의 항로가 보입니다.<br>아래로 스크롤해 항해를 시작하세요.</p>
+      <h1 class="fade" id="hero1-title"><span style="color:#3bd1c6">작은 습관</span>이<br>우리의 항로를 바꾼다</h1>
+      <p class="sub fade" id="hero1-subtitle">친환경 실천이 모이면, 우리 반의 항로가 보입니다.<br>아래로 스크롤해 항해를 시작하세요.</p>
     </div>
   </section>
 
@@ -147,12 +25,12 @@
   <div class="spacer"></div>
 
   <!-- Hero2 -->
-   <section class="hero2 wrap">
+  <section class="hero2 wrap">
     <div>
-      <h1 class="fade" id="title"> 친환경 소개글...</h1>
-      <p class="sub fade" id="subtitle">어쩌구저쩌구 아 하기싫다 진짜<br>ㅗㅗㅗㅗㅗㅗㅗㅗㅗㅗㅗㅗㅗㅗㅗㅗㅗㅗㅗ<br>ㅗㅗㅗㅗㅗㅗㅗㅗㅗㅗㅗㅗㅗㅗㅗㅗㅗ</p>
+      <h1 class="fade" id="hero2-title">친환경 소개글...</h1>
+      <p class="sub fade" id="hero2-subtitle">프로젝트 소개 문구가 들어갈 자리</p>
     </div>
-   </section>
+  </section>
 
   <!-- 섬 1 -->
   <section class="island wrap" id="isle-log">
@@ -180,39 +58,38 @@
     </div>
   </section>
 
-    <!-- Eco HUD: 첫 화면 정보 박스 -->
-    <div class="eco-hud fade" id="ecoHud">
-      <div class="eco-top">
-        <div class="eco-icon">🌿</div>
-        <div>
-          <div class="eco-title">오늘 우리 학교가 줄인 탄소</div>
-          <div class="eco-metric"><span id="co2Num" class="eco-num">0.0</span><span class="eco-unit">kg CO₂</span></div>
-        </div>
-        <div class="ring" style="margin-left:auto">
-          <svg width="84" height="84">
-            <circle cx="42" cy="42" r="36" fill="none" stroke="rgba(255,255,255,.15)" stroke-width="10"/>
-            <circle id="ringProg" cx="42" cy="42" r="36" fill="none"
-                    stroke="#3bd1c6" stroke-width="10" stroke-linecap="round"
-                    stroke-dasharray="226.2" stroke-dashoffset="226.2"/>
-          </svg>
-          <div class="txt" id="ringTxt">0%</div>
-        </div>
-      </div>
+  <div class="spacer"></div>
+  <div class="wrap">
 
-      <div class="tip" id="tipBox">
-        <strong>Tip:</strong> 물 끓일 땐 뚜껑을! 가스·전기 절감 효과 👍
+  <!-- Eco HUD -->
+  <div class="eco-hud fade" id="ecoHud">
+    <div class="eco-top">
+      <div class="eco-icon">🌿</div>
+      <div>
+        <div class="eco-title">오늘 우리 학교가 줄인 탄소</div>
+        <div class="eco-metric"><span id="co2Num" class="eco-num">0.00</span><span class="eco-unit">kg CO₂</span></div>
       </div>
-
-      <div class="eco-row">
-        <span class="chip-sdgs"># SDGs 12 지속가능한 소비</span>
-        <span class="chip-sdgs"># SDGs 13 기후행동</span>
-        <span class="chip-sdgs"># 에너지 절약 ⚡</span>
-        <span class="chip-sdgs"># 일회용 줄이기 🥤</span>
+      <div class="ring" style="margin-left:auto">
+        <svg width="84" height="84">
+          <circle cx="42" cy="42" r="36" fill="none" stroke="rgba(255,255,255,.15)" stroke-width="10"/>
+          <circle id="ringProg" cx="42" cy="42" r="36" fill="none"
+                  stroke="#3bd1c6" stroke-width="10" stroke-linecap="round"
+                  stroke-dasharray="226.2" stroke-dashoffset="226.2"/>
+        </svg>
+        <div class="txt" id="ringTxt">0%</div>
       </div>
-
-      
     </div>
 
+    <div class="tip" id="tipBox"><strong>Tip:</strong> 물 끓일 땐 뚜껑을! 가스·전기 절감 효과 👍</div>
+
+    <div class="eco-row">
+      <span class="chip-sdgs"># SDGs 12 지속가능한 소비</span>
+      <span class="chip-sdgs"># SDGs 13 기후행동</span>
+      <span class="chip-sdgs"># 에너지 절약 ⚡</span>
+      <span class="chip-sdgs"># 일회용 줄이기 🥤</span>
+    </div>
+  </div>
+</div>
   <div class="footer"></div>
 
   <script>
@@ -228,17 +105,20 @@
     }, {threshold:0.25});
     document.querySelectorAll('.fade, .isle-mark').forEach(n=>io.observe(n));
 
-    // 초기 순차 등장
+    // 초기 순차 등장 (Hero1만 타겟)
     window.addEventListener('load', ()=>{
       const boat = document.getElementById('boat');
-      document.getElementById('title').classList.add('visible');
-      setTimeout(()=>document.getElementById('subtitle').classList.add('visible'), 300);
+      const t1   = document.getElementById('hero1-title');
+      const s1   = document.getElementById('hero1-subtitle');
+
+      if (t1) t1.classList.add('visible');
+      if (s1) setTimeout(()=> s1.classList.add('visible'), 300);
 
       // 보트 1단계: 페이드인
       setTimeout(()=> { boat.style.opacity = 1; }, 500);
 
       // 보트 2단계: 회전 (천천히 2초)
-      setTimeout(()=> {
+      setTimeout(()=>{
         boat.style.transition = "transform 2s ease";
         boat.style.transform = "translateX(-20%) rotate(90deg)";
       }, 1500);
@@ -249,13 +129,13 @@
       const boat = document.getElementById('boat');
       const scrollTop = window.scrollY;
       const docHeight = document.body.scrollHeight - window.innerHeight;
-      const pct = scrollTop / docHeight;
-      const minY = window.innerHeight * 0.24;
-      const maxY = window.innerHeight * 0.72;
-      boat.style.top = (minY + (maxY-minY)*pct) + "px";
+      const pct = docHeight > 0 ? (scrollTop / docHeight) : 0;
+      const minY = window.innerHeight * 0.70;
+      const maxY = window.innerHeight * 0.95;
+      boat.style.top = (minY + (maxY - minY) * pct) + "px";
     });
 
-    /* === Eco HUD 동작: 숫자 카운트, 도넛, 팁 롤링 === */
+    // Eco HUD 동작
     (function(){
       const hud = document.getElementById('ecoHud');
       const co2Num = document.getElementById('co2Num');
@@ -263,28 +143,24 @@
       const ringTxt = document.getElementById('ringTxt');
       const tipBox = document.getElementById('tipBox');
 
-      // 오늘 절감량 (log.html에서 localStorage에 저장한다고 가정)
       const todayKey = new Date().toISOString().slice(0,10) + '_gs_saved';
       const saved = parseFloat(localStorage.getItem('gs_saved_kg_today') || localStorage.getItem(todayKey) || '0') || 0;
 
-      // 목표치: 20kg (원하면 조정)
       const GOAL = 20;
 
       function animateValue(el, start, end, dur){
         const st = performance.now();
         function f(now){
           const t = Math.min(1, (now - st)/dur);
-          const eased = t<.5 ? 2*t*t : 1 - Math.pow(-2*t+2,2)/2;
-          const val = start + (end-start)*eased;
-          el.textContent = val.toFixed(1);
-          if(t<1) requestAnimationFrame(f);
+          const eased = t < .5 ? 2*t*t : 1 - Math.pow(-2*t+2,2)/2;
+          el.textContent = (start + (end - start) * eased).toFixed(2);
+          if(t < 1) requestAnimationFrame(f);
         }
         requestAnimationFrame(f);
       }
       animateValue(co2Num, 0, saved, 900);
 
-      // 도넛 진행
-      const C = 2*Math.PI*36; // 둘레 ≈226.2
+      const C = 2*Math.PI*36;
       const pct = Math.max(0, Math.min(100, Math.round(saved/GOAL*100)));
       ring.style.strokeDasharray = C;
       ring.style.strokeDashoffset = C;
@@ -294,7 +170,6 @@
         ringTxt.textContent = pct + '%';
       });
 
-      // 팁 롤링
       const tips = [
         '물 끓일 땐 뚜껑! 가스·전기 절감 효과 👍',
         '엘리베이터 대신 계단 오르면 CO₂와 건강 동시 케어',
@@ -314,7 +189,6 @@
       }
       setInterval(nextTip, 6000);
 
-      // HUD 페이드인
       if(hud) setTimeout(()=>hud.classList.add('visible'), 400);
     })();
   </script>
