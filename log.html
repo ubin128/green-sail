@@ -1,18 +1,166 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <title>오늘의 기록</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>오늘의 기록 · 친환경 생활 습관 챌린지</title>
+  <!-- ✅ 공통 스타일만 사용 -->
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>오늘의 항해일지 기록 ✍️</h1>
-  <form>
-    <label><input type="checkbox"> 텀블러 사용</label><br>
-    <label><input type="checkbox"> 교실 불 끄기</label><br>
-    <label><input type="checkbox"> 잔반 0</label><br><br>
-    <button type="button">기록 제출</button>
-  </form>
-  <p><a href="index.html">⬅️ 메인으로 돌아가기</a></p>
+  <div class="wrap">
+    <header>
+      <div class="brand">🌿 초록돛단배</div>
+      <nav>
+        <a class="btn-link" href="index.html">← 홈으로</a>
+      </nav>
+    </header>
+
+    <section class="panel">
+      <h1>오늘의 기록</h1>
+      <p class="sub">체크한 항목만큼 오늘의 탄소 절감량(kg CO₂)을 계산해 저장해요.</p>
+
+      <div class="datebox">
+        <strong>날짜</strong>
+        <span id="todayStr"></span>
+      </div>
+
+      <!-- 체크리스트 -->
+      <div class="grid" id="list">
+        <!-- 에너지 절약 -->
+        <div class="card">
+          <div class="item">
+            <input id="c_light" type="checkbox" data-kg="0.05">
+            <label for="c_light">불필요한 전등 끄기</label>
+          </div>
+          <small>빈 교실·집에서 전등 바로 끄기 (≈ 0.05 kg)</small>
+        </div>
+
+        <div class="card">
+          <div class="item">
+            <input id="c_plug" type="checkbox" data-kg="0.03">
+            <label for="c_plug">사용하지 않는 어댑터/멀티탭 뽑기</label>
+          </div>
+          <small>대기전력 줄이기 (≈ 0.03 kg)</small>
+        </div>
+
+        <!-- 이동 -->
+        <div class="card">
+          <div class="item">
+            <input id="c_stairs" type="checkbox" data-kg="0.03">
+            <label for="c_stairs">엘리베이터 대신 계단 이용</label>
+          </div>
+          <small>짧은 층간 이동 대체 (≈ 0.03 kg)</small>
+        </div>
+
+        <div class="card">
+          <div class="item">
+            <input id="c_transit" type="checkbox" data-kg="0.35">
+            <label for="c_transit">도보/자전거/대중교통 이용</label>
+          </div>
+          <small>단거리 승용차 대체 (≈ 0.35 kg)</small>
+        </div>
+
+        <!-- 소비 -->
+        <div class="card">
+          <div class="item">
+            <input id="c_tumbler" type="checkbox" data-kg="0.06">
+            <label for="c_tumbler">텀블러/머그 사용</label>
+          </div>
+          <small>일회용 컵 1개 대체 (≈ 0.06 kg)</small>
+        </div>
+
+        <div class="card">
+          <div class="item">
+            <input id="c_food" type="checkbox" data-kg="0.12">
+            <label for="c_food">잔반 줄이기</label>
+          </div>
+          <small>음식물 쓰레기 감축 (≈ 0.12 kg)</small>
+        </div>
+      </div>
+
+      <!-- 합계/버튼 -->
+      <div class="total">
+        <span>오늘 체크 합계</span>
+        <span><strong id="sumKg">0.00</strong> kg CO₂</span>
+      </div>
+
+      <div class="actions">
+        <button class="btn" id="btnSave">오늘 기록 저장</button>
+        <button class="btn secondary" id="btnResetToday">오늘 기록 초기화</button>
+      </div>
+      <div class="note">※ 가중치(kg)는 프로젝트 예시치입니다. 학교/팀 기준에 맞게 조정하세요.</div>
+      <div class="success" id="msg">✅ 저장되었습니다. 홈 화면의 탄소 현황(HUD)에 반영돼요!</div>
+    </section>
+  </div>
+
+  <script>
+    // 날짜 표시
+    const todayStr = document.getElementById('todayStr');
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = String(now.getMonth()+1).padStart(2,'0');
+    const d = String(now.getDate()).padStart(2,'0');
+    const yyyy_mm_dd = `${y}-${m}-${d}`;
+    todayStr.textContent = `${y}년 ${m}월 ${d}일 (${['일','월','화','수','목','금','토'][now.getDay()]})`;
+
+    // 합계 계산
+    const sumEl = document.getElementById('sumKg');
+    const list = document.getElementById('list');
+    function calcSum(){
+      const checks = list.querySelectorAll('input[type="checkbox"]');
+      let sum = 0;
+      checks.forEach(ch=>{
+        if(ch.checked){
+          const kg = parseFloat(ch.dataset.kg || '0') || 0;
+          sum += kg;
+        }
+      });
+      sumEl.textContent = sum.toFixed(2);
+      return sum;
+    }
+    list.addEventListener('change', calcSum);
+    calcSum();
+
+    // 저장 로직 (index.html HUD가 읽는 키와 동기화)
+    const MSG = document.getElementById('msg');
+    document.getElementById('btnSave').addEventListener('click', ()=>{
+      const add = calcSum();
+      const todayKey = `${yyyy_mm_dd}_gs_saved`;
+
+      const prevCommon = parseFloat(localStorage.getItem('gs_saved_kg_today') || '0') || 0;
+      const prevToday  = parseFloat(localStorage.getItem(todayKey) || '0') || 0;
+
+      const newCommon = (prevCommon + add);
+      const newToday  = (prevToday  + add);
+
+      localStorage.setItem('gs_saved_kg_today', newCommon.toString());
+      localStorage.setItem(todayKey, newToday.toString());
+
+      MSG.classList.add('show');
+      MSG.textContent = `✅ 저장되었습니다! 오늘 누적: ${newToday.toFixed(2)} kg CO₂`;
+    });
+
+    // 오늘 기록 초기화
+    document.getElementById('btnResetToday').addEventListener('click', ()=>{
+      const todayKey = `${yyyy_mm_dd}_gs_saved`;
+      localStorage.removeItem(todayKey);
+      localStorage.removeItem('gs_saved_kg_today');
+      MSG.classList.add('show');
+      MSG.textContent = '♻️ 오늘 기록을 초기화했습니다.';
+      list.querySelectorAll('input[type="checkbox"]').forEach(ch=> ch.checked = false);
+      calcSum();
+    });
+
+    // 기존 값 안내
+    (function showPrev(){
+      const todayKey = `${yyyy_mm_dd}_gs_saved`;
+      const prev = parseFloat(localStorage.getItem(todayKey) || '0') || 0;
+      if(prev > 0){
+        MSG.classList.add('show');
+        MSG.textContent = `ℹ️ 현재까지 오늘 누적: ${prev.toFixed(2)} kg CO₂`;
+      }
+    })();
+  </script>
 </body>
 </html>
