@@ -1,15 +1,31 @@
-board.html
-
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>반별 현황판</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <link rel="stylesheet" href="style.css" />
+  <style>
+    body { font-family: system-ui, sans-serif; padding: 24px; }
+    .actions { display: flex; gap: 8px; margin: 16px 0; flex-wrap: wrap; }
+    #log { white-space: pre-wrap; background:#f7f7f7; padding:12px; border-radius:8px; }
+    table { margin-top: 12px; }
+    th, td { padding: 6px 10px; }
+  </style>
 </head>
 <body>
   <h1>반별 현황판 📊</h1>
+
+  <!-- 입력 폼 -->
+  <div class="actions" style="margin-bottom:10px">
+    <input id="cls" placeholder="반 (예: 2-1)" />
+    <input id="date" type="date" />
+    <input id="tumbler" type="number" min="0" placeholder="텀블러" />
+    <input id="lightOff" type="number" min="0" placeholder="소등" />
+    <input id="zeroWaste" type="number" min="0" placeholder="제로웨이스트" />
+    <button id="addReal">추가</button>
+  </div>
+
+  <!-- 테스트/불러오기 버튼 -->
   <div class="actions">
     <button id="addTest">테스트 데이터 추가</button>
     <button id="loadBtn">데이터 불러오기</button>
@@ -17,12 +33,19 @@ board.html
 
   <canvas id="myChart" width="600" height="300"></canvas>
 
+  <h3>반별 순위</h3>
+  <table id="rank" border="1" style="border-collapse:collapse; min-width:320px">
+    <thead>
+      <tr><th>순위</th><th>반</th><th>합계</th></tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
   <h3>로그</h3>
   <div id="log">준비됨…</div>
 
-  <!-- 🔸 Firebase 모듈 불러오기 (app-firebase.js가 같은 폴더에 있어야 함) -->
   <script type="module">
-    import { addRecord, getAllRecords } from './app-firebase-v2.js';
+    import { addRecord, getAllRecordsOrdered, getWeeklyTotal, upsertRecordByKey } from './app-firebase.js';
 
     const log = (...args) => {
       const el = document.getElementById('log');
@@ -30,6 +53,7 @@ board.html
       console.log(...args);
     };
 
+    // 차트 준비
     const ctx = document.getElementById('myChart').getContext('2d');
     const chart = new Chart(ctx, {
       type: 'bar',
@@ -37,24 +61,74 @@ board.html
       options: { responsive: true, scales: { y: { beginAtZero: true } } }
     });
 
+    // 테스트 데이터 추가
     document.getElementById('addTest').addEventListener('click', async () => {
       try {
         const now = new Date().toISOString().slice(0,10);
         await addRecord({ date: now, class: "2-1", tumbler: 1, lightOff: 1, zeroWaste: 0 });
-        log('✅ 테스트 데이터 추가 완료. Firestore 콘솔에서 records 컬렉션 확인하세요.');
+        log('✅ 테스트 데이터 추가 완료!');
       } catch (e) { log('❌ 추가 실패:', e.message); }
     });
 
+    // 데이터 불러오기 (+순위표 렌더)
     document.getElementById('loadBtn').addEventListener('click', async () => {
       try {
-        const records = await getAllRecords();
-        log('✅ 불러오기 성공. 아래는 records 전체:', records);
+        const records = await getAllRecordsOrdered();           // ⬅️ 정렬해서 읽기
+        log('✅ 불러오기 성공(정렬):', records);
+
+        // 차트 업데이트
         const labels = records.map(r => r.class || r.date);
         const values = records.map(r => (r.tumbler||0) + (r.lightOff||0) + (r.zeroWaste||0));
         chart.data.labels = labels;
         chart.data.datasets[0].data = values;
         chart.update();
-      } catch (e) { log('❌ 불러오기 실패:', e.message); }
+
+        // 반별 합계 집계 → 순위표
+        const byClass = {};
+        for (const r of records) {
+          const cls = r.class || '미지정';
+          const sum = (r.tumbler||0) + (r.lightOff||0) + (r.zeroWaste||0);
+          byClass[cls] = (byClass[cls] || 0) + sum;
+        }
+        const rank = Object.entries(byClass)
+          .map(([cls,total]) => ({ cls, total }))
+          .sort((a,b) => b.total - a.total);
+
+        const tbody = document.querySelector('#rank tbody');
+        tbody.innerHTML = rank.map((r,i)=>
+          `<tr><td>${i+1}</td><td>${r.cls}</td><td>${r.total}</td></tr>`
+        ).join('');
+
+        // (선택) 최근 7일 합계 로그
+        try {
+          const weekly = await getWeeklyTotal();
+          log('📈 최근 7일 합계:', weekly, '\n', records);
+        } catch (e) {
+          console.warn('주간합계 계산 중 경고:', e);
+        }
+
+      } catch (e) {
+        console.error(e);
+        log('❌ 불러오기 실패:', e.code || e.message);
+      }
+    });
+
+    // 입력 폼 → 업서트 저장 (중복 방지: 같은 날짜+반이면 덮어쓰기)
+    document.getElementById('addReal').addEventListener('click', async () => {
+      const d = document.getElementById('date').value || new Date().toISOString().slice(0,10);
+      const c = document.getElementById('cls').value || "2-1";
+      const t = Number(document.getElementById('tumbler').value || 0);
+      const l = Number(document.getElementById('lightOff').value || 0);
+      const z = Number(document.getElementById('zeroWaste').value || 0);
+
+      try {
+        const id = await upsertRecordByKey({ date: d, class: c, tumbler: t, lightOff: l, zeroWaste: z });
+        console.log('✅ 저장(업서트) 완료, id:', id);
+        alert(`저장 완료 (${id})`);
+      } catch (e) {
+        console.error(e);
+        alert('저장 실패: ' + (e.code || e.message));
+      }
     });
   </script>
 </body>
