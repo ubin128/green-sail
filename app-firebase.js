@@ -58,5 +58,42 @@ export async function upsertRecordByKey(record) {
   return id;
 }
 
+// ✅ 날짜 범위 + 반 필터 조회
+import { where } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+/**
+ * 조건부 조회
+ * @param {{ startDate?: string, endDate?: string, cls?: string }} opts
+ *  - startDate/endDate: "YYYY-MM-DD" 문자열 (둘 다 선택)
+ *  - cls: 반 이름 (예: "2-1"), 생략 또는 "ALL"이면 전체
+ */
+export async function getRecordsByRangeAndClass(opts = {}) {
+  const { startDate, endDate, cls } = opts;
+
+  // 기본 컬렉션
+  let q = collection(db, "records");
+  const clauses = [];
+
+  // 날짜 범위 필터 (문자열 YYYY-MM-DD이므로 비교 가능)
+  if (startDate) clauses.push(where("date", ">=", startDate));
+  if (endDate)   clauses.push(where("date", "<=", endDate));
+
+  // 반 필터
+  if (cls && cls !== "ALL") clauses.push(where("class", "==", cls));
+
+  // orderBy는 date로 (범위필터와 동일 필드)
+  if (clauses.length > 0) {
+    q = query(collection(db, "records"), ...clauses, orderBy("date", "asc"));
+  } else {
+    q = query(collection(db, "records"), orderBy("date", "asc"));
+  }
+
+  // 주의: class == X + orderBy(date) 조합은 "인덱스 생성"이 필요할 수 있음
+  // 콘솔에 링크가 뜨면 눌러서 인덱스 한 번만 만들어주면 됩니다.
+  const snap = await getDocs(q);
+  return snap.docs.map(d => d.data());
+}
+
+
 console.log("[app-firebase.js] loaded ✅");
 
