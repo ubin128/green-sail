@@ -1,5 +1,4 @@
 /* ✅ 공통 폰트 */
-/* 1. 나눔스퀘어 (기본 폰트) */
 @font-face {
     font-family: 'NanumSquare';
     src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2107@1.1/NanumSquare-Regular.woff') format('woff');
@@ -13,25 +12,6 @@
     font-style: normal;
 }
 
-/* 2. 나눔스퀘어 라운드 (Hero1 전용 폰트) */
-@font-face {
-    font-family: 'NanumSquareRound';
-    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_two@1.0/NanumSquareRound.woff') format('woff');
-    font-weight: 400; /* 보통 */
-    font-style: normal;
-}
-@font-face {
-    font-family: 'NanumSquareRound';
-    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_two@1.0/NanumSquareRoundB.woff') format('woff');
-    font-weight: 700; /* 굵게 */
-    font-style: normal;
-}
-@font-face {
-    font-family: 'NanumSquareRound';
-    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_two@1.0/NanumSquareRoundEB.woff') format('woff');
-    font-weight: 800; /* 👈 아주 굵은 굵기 (ExtraBold) */
-    font-style: normal;
-}
 
 
 /* === 컬러 변수 === */
@@ -48,7 +28,7 @@
 body{
   margin:0; font-family:'NanumSquare', sans-serif; color:var(--ink);
   background: /* radial-gradient(120% 90% at 50% 0%, var(--deep2), var(--deep1) 50%) fixed, */
-              linear-gradient(180deg, #2E8A99 0% /* 밝은 바다 표면 (0%) */, var(--deep3) 30% /* 중간 깊이 바다 (30% 지점) */, var(--deep1) 100%/* 가장 어두운 심해 (100%) */);
+              linear-gradient(180deg, #2E8A99 0% /* 밝은 바다 표면 (0%) */, var(--deep3) 35% /* 중간 깊이 바다 (30% 지점) */, var(--deep1) 100%/* 가장 어두운 심해 (100%) */);
   overflow-x:hidden;
   min-height:100vh;
 }
@@ -58,33 +38,56 @@ body{
 .spacer{height:100vh}   /*14*/
 
 /* 페이드인 애니메이션 */
-.fade{opacity:0; transform:translateY(16px); transition:opacity 1s ease, transform 1s ease}
+.fade{opacity:0; transform:translateY(16px); transition:opacity 1.3s ease, transform 1.3s ease}
 .fade.visible{opacity:1; transform:none}
 
 /* Hero 영역 */
 .hero1{
   min-height:100vh; display:flex; align-items:flex-start; padding-top:20vh; position:relative;
-  font-family: 'NanumSquareRound', sans-serif !important; /* ✅ 이 한 줄을 추가해주세요! */
+  font-family: 'NanumSquare', sans-serif; 
 }
 .hero1 h1{
   font-size:clamp(28px,5.6vw,64px); margin:0 0 20px; 
   text-shadow:0 8px 36px rgba(0,0,0,.4); font-weight:700;
 }
-.hero1 p.sub{font-size:clamp(14px,2.2vw,20px); opacity:.9}
+/* ✅ "작은 습관" 부분에만 적용될 노란색 그림자 (이 부분을 추가하세요!) */
+.hero1 h1 .highlight {
+  text-shadow: 0 4px 20px rgba(255, 220, 19, 0.5); /* 노란색 그림자 */
+}
+/* ✅ '우리의 항로를 바꾼다' 부분의 투명도 조절 */
+.hero1 h1 .dimmed {
+    opacity: 0.85; /* 0.0 (완전 투명) ~ 1.0 (완전 불투명) 사이의 값으로 조절 */
+}
+.hero1 p.sub{font-size:clamp(14px,2.2vw,20px); opacity:.95}
 
 /* 보트 */
 .boat{
   position:absolute; left:25%; top:70vh;
-  width:11%; transform:translateX(-50%) rotate(0deg);
+  width:11%; transform:translateX(-50%); rotate:(0deg);
   transform-origin:center center;
-  transition:opacity 2.0s ease;
+  transition:opacity 0.8s ease; 
   filter:drop-shadow(0 12px 30px rgba(0,0,0,.45));
   opacity:0; z-index:10;
 }
 .boat img{width:100%}
 
-.spacer{
-  height: 80vh;
+.spacer1{
+  height: 150vh;
+}
+
+.hero2 h1{
+  font-size: clamp(24px, 4vw, 42px); /* hero1보다 작은 제목 크기 */
+    margin: 0 0 20px;
+    font-weight: 700;
+    text-shadow: 0 6px 28px rgba(0, 0, 0, 0.4); /* 그림자도 살짝 줄임 */
+}
+.hero2 p.sub {
+    font-size: clamp(16px, 2vw, 18px); /* hero1보다 작은 서브 텍스트 크기 */
+    opacity: 0.9;
+}
+
+.spacer2{
+  height: 5vh;
 }
 
 /* 섬 */
@@ -99,7 +102,8 @@ body{
 }
 .chip{display:inline-block; padding:6px 12px; border-radius:999px; font-weight:700;
   background:rgba(59,209,198,.18); border:1px solid rgba(59,209,198,.4); margin-bottom:10px}
-.island h2{margin:6px 0 8px; font-size:clamp(22px,4.2vw,36px)}
+
+.island h2{margin:6px 0 8px; font-size:clamp(50px,6.5vw,60px)}
 
 .isle-mark{
   width:92px; height:92px; border-radius:18px;
@@ -118,12 +122,24 @@ body{
   display:inline-block; margin-top:6px;
   background:linear-gradient(90deg,#3bd1c6,#7ee8de);
   color:#063346; text-decoration:none; font-weight:700;
-  padding:12px 16px; border-radius:12px; box-shadow:0 8px 24px rgba(59,209,198,.25)
+  padding:12px 20px; border-radius:12px; box-shadow:0 8px 24px rgba(59,209,198,.25)
 }
 .btn:hover{filter:brightness(1.05)}
 
 /* Footer */
-.footer{height:16vh}
+.footer{
+  height:auto;     
+  padding: 40px 0; /* 위아래 여백을 넉넉하게 줌 */
+  text-align: center; /* 내부 모든 텍스트를 가운데 정렬 */
+  opacity: 0.7; /* 너무 튀지 않게 살짝 투명하게 */
+}
+
+.student-info {
+    /* position, top, right, z-index 등 고정 속성 모두 제거! */
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 10px; /* 아래 저작권 문구와 간격을 줌 */
+}
 
 /* === Eco HUD === */
 .eco-hud{

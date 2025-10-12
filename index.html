@@ -11,8 +11,8 @@
   <!-- Hero1 -->
   <section class="hero1 wrap">
     <div>
-      <h1 class="fade" id="hero1-title"><span style="color:#ffd016">작은 습관</span>이<br>우리의 항로를 바꾼다</h1>
-      <p class="sub fade" id="hero1-subtitle">친환경 실천이 모이면, 우리 반의 항로가 보입니다.<br>아래로 스크롤해 항해를 시작하세요.</p>
+      <h1 class="fade" id="hero1-title"><span class=highlight style="color:#fff316ee">작은 습관</span><span class=dimmed>이<br>우리의 항로를 바꾼다</span></h1>
+      <p class="sub fade" id="hero1-subtitle">친환경 실천이 모이면, 우리 반의 항로가 보입니다.<br>당신의 실천으로 더 푸른 바다를 향한 항해를 시작하세요 :)</p>
     </div>
   </section>
 
@@ -21,21 +21,24 @@
     <img src="ship-yacht.svg" alt="보트">
   </div>
 
-  <div class="spacer"></div>
+  <div class="spacer1"></div>
 
   <!-- Hero2 -->
   <section class="hero2 wrap" id="hero2-section">
     <div>
       <h1 class="fade">새로운 항해의 시작</h1>
-      <p class="sub fade">당신의 기록이 새로운 지도를 만듭니다.<br>아래에서 당신의 항해를 기록하고 함대의 현황을 확인하세요.</p>
+      <p class="sub fade">일상 속 작은 행동이 변화를 만듭니다.<br>아래에서 오늘의 친환경 습관을 기록하고, 반별 결과를 확인하세요.</p>
     </div>
   </section>
 
+  <div class="spacer2"></div>
+
+  
   <!-- 카드 3종(기록/현황/HUD) -->
   <section class="card-container wrap">
 
     <div class="card fade">
-      <div class="isle-mark">🏝️</div>
+      <div class="isle-mark" style="font-size:40px">🏝️</div>
       <span class="chip">첫 번째 섬</span>
       <h2>오늘의 기록</h2>
       <p>오늘 실천한 항목을 체크해보세요!</p>
@@ -43,7 +46,7 @@
     </div>
 
     <div class="card fade">
-      <div class="isle-mark">🏝️</div>
+      <div class="isle-mark" style="font-size:40px">🏝️</div>
       <span class="chip">두 번째 섬</span>
       <h2>함대 현황판</h2>
       <p>반별 평균 달성률을 비교해보아요.</p>
@@ -61,10 +64,10 @@
         </div>
         <div class="ring" style="margin-left:auto">
           <svg width="84" height="84">
-            <circle cx="42" cy="42" r="36" fill="none" stroke="rgba(255,255,255,.15)" stroke-width="10"/>
+            <circle cx="42" cy="42" r="36" fill="none" stroke="rgba(255,255,255,.15)" stroke-width="10"></circle>
             <circle id="ringProg" cx="42" cy="42" r="36" fill="none"
                     stroke="#3bd1c6" stroke-width="10" stroke-linecap="round"
-                    stroke-dasharray="226.2" stroke-dashoffset="226.2"/>
+                    stroke-dasharray="226.2" stroke-dashoffset="226.2"></circle>
           </svg>
           <div class="txt" id="ringTxt">0%</div>
         </div>
@@ -84,72 +87,99 @@
 
   <div class="footer"></div>
 
-  <script>
-    // 페이드인/아웃
+<script>
+    // 페이드인/아웃 (기존과 동일)
     const io = new IntersectionObserver((entries)=>{
-      entries.forEach(entry=>{
-        if(entry.isIntersecting){ entry.target.classList.add('visible'); }
-        else { entry.target.classList.remove('visible'); }
-      });
+        entries.forEach(entry=>{
+            if(entry.isIntersecting){ entry.target.classList.add('visible'); }
+            else { entry.target.classList.remove('visible'); }
+        });
     }, {threshold:0.25});
     document.querySelectorAll('.fade, .isle-mark').forEach(n=>io.observe(n));
 
-    // 초기 순차 등장 + 자동 항해
+    // --- ✨ 모든 애니메이션을 제어하는 새로운 코드 ---
     window.addEventListener('load', () => {
-      const boat = document.getElementById('boat');
-      const t1 = document.getElementById('hero1-title');
-      const s1 = document.getElementById('hero1-subtitle');
+        const boat = document.getElementById('boat');
+        const t1 = document.getElementById('hero1-title');
+        const s1 = document.getElementById('hero1-subtitle');
 
-      if (t1) t1.classList.add('visible');
-      if (s1) setTimeout(() => s1.classList.add('visible'), 300);
+        if (t1) t1.classList.add('visible');
+        if (s1) setTimeout(() => s1.classList.add('visible'), 300);
 
-      // 보트 페이드인
-      setTimeout(() => { boat.style.opacity = 1; }, 1500);
-
-      // 보트 회전
-      setTimeout(() => {
-        boat.style.transition = "transform 2s ease";
-        boat.style.transform = "translateX(-20%) translateY(-50%) rotate(90deg)";
-      }, 2500);
-
-      // 자동 항해 애니메이션 (Hero2로)
-      function startJourney() {
-        const JOURNEY_DURATION = 4000;
-        const TARGET_SECTION_ID = 'hero2-section';
-
-        document.querySelectorAll('.fade, .isle-mark').forEach(el => el.classList.add('visible'));
-
-        const targetSection = document.getElementById(TARGET_SECTION_ID);
-        if (!targetSection) return;
-
-        // 현재 보트 시각 위치 보정
-        const boatRect = boat.getBoundingClientRect();
-        const startBoatY = boatRect.top + (boatRect.height / 2);
-        boat.style.transform = 'translateX(-20%) rotate(90deg)'; // Y축 보정 제거
-        boat.style.top = startBoatY + 'px';
-
+        // --- 1. 보트 등장 ---
         setTimeout(() => {
-          const startTime = performance.now();
-          const startScrollY = window.scrollY;
-          const endScrollY = targetSection.offsetTop - (window.innerHeight / 2) + (targetSection.offsetHeight / 2);
-          const endBoatY = endScrollY + (window.innerHeight / 2);
+            boat.style.transition = "opacity 1.3s ease";
+            boat.style.opacity = 1;
+        }, 1300);
 
-          function animate(now) {
-            const t = Math.min((now - startTime) / JOURNEY_DURATION, 1);
-            const e = 0.5 - 0.5 * Math.cos(t * Math.PI); // easeInOut
-            const yBoat = startBoatY + (endBoatY - startBoatY) * e;
-            const yScroll = startScrollY + (endScrollY - startScrollY) * e;
-            boat.style.top = yBoat + 'px';
-            window.scrollTo(0, yScroll);
-            if (t < 1) requestAnimationFrame(animate);
-          }
-          requestAnimationFrame(animate);
-        }, 0);
-      }
-      setTimeout(startJourney, 4000);
+        // --- 2. 보트 회전 ---
+        setTimeout(() => {
+            boat.style.transition = "transform 1.5s ease";
+            boat.style.transform = "translateX(-20%) translateY(-50%) rotate(90deg)";
+        }, 2000);
+
+        // --- 3. 회전이 끝나면, 자동 항해 시작 ---
+        boat.addEventListener('transitionend', function startJourneyOnce(event) {
+            // 'transform' 애니메이션이 끝났을 때만 실행
+            if (event.propertyName !== 'transform' || boat.style.opacity === '0') return;
+            
+            boat.removeEventListener('transitionend', startJourneyOnce);
+            startJourney();
+        });
+
+        // 자동 항해 애니메이션 함수
+        function startJourney() {
+            const JOURNEY_DURATION = 2500;
+            const TARGET_SECTION_ID = 'hero2-section';
+
+            document.querySelectorAll('.fade, .isle-mark').forEach(el => el.classList.add('visible'));
+
+            const targetSection = document.getElementById(TARGET_SECTION_ID);
+            if (!targetSection) return;
+
+            const boatRect = boat.getBoundingClientRect();
+            const startBoatY = boatRect.top + (boatRect.height / 2);
+            boat.style.transform = 'translateX(-20%) rotate(90deg)';
+            boat.style.top = startBoatY + 'px';
+
+            setTimeout(() => {
+                const startTime = performance.now();
+                const startScrollY = window.scrollY;
+                const endScrollY = targetSection.offsetTop - (window.innerHeight / 2) + (targetSection.offsetHeight / 2);
+                const endBoatY = endScrollY + (window.innerHeight / 2);
+
+                function animate(now) {
+                    const t = Math.min((now - startTime) / JOURNEY_DURATION, 1);
+                    const e = 0.5 - 0.5 * Math.cos(t * Math.PI);
+                    boat.style.top = (startBoatY + (endBoatY - startBoatY) * e) + 'px';
+                    window.scrollTo(0, startScrollY + (endScrollY - startScrollY) * e);
+                    
+                    if (t < 1) {
+                        requestAnimationFrame(animate);
+                    } else {
+                        // 4. 항해 도착 후, 마무리 애니메이션 실행
+                        finishJourney();
+                    }
+                }
+                requestAnimationFrame(animate);
+            }, 0);
+        }
+
+        // 마무리 애니메이션 함수
+        function finishJourney() {
+            // 4-1. 원래 각도로 회전 (1.5초 동안)
+            boat.style.transition = "transform 1.5s ease";
+            boat.style.transform = "translateX(-50%) rotate(0deg)";
+
+            // 4-2. 회전이 끝난 후, 서서히 사라지기 (페이드 아웃)
+            setTimeout(() => {
+                boat.style.transition = "opacity 1.5s ease";
+                boat.style.opacity = 0;
+            }, 1500); // 회전 시간(1500ms)이 끝난 직후에 실행
+        }
     });
 
-    // Eco HUD
+       // Eco HUD
     (function(){
       const hud = document.getElementById('ecoHud');
       const co2Num = document.getElementById('co2Num');
@@ -204,6 +234,13 @@
 
       if(hud) setTimeout(()=>hud.classList.add('visible'), 400);
     })();
-  </script>
+</script>
+
 </body>
-</html>
+</html><!--학번 이름-->
+  <div class="footer">
+        <div class="student-info">
+            <span>20930 최유빈 20226 장수호 20221 이강산</span>
+        </div>
+        <p>© 2025 공동체 가치 나눔 프로젝트_ 초록돛단배🌿⛵</p>
+    </div>
