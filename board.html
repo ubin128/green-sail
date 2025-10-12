@@ -5,55 +5,197 @@
   <title>반별 현황판</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    body { font-family: system-ui, sans-serif; padding: 24px; }
-    .actions { display: flex; gap: 8px; margin: 16px 0; flex-wrap: wrap; }
-    #log { white-space: pre-wrap; background:#f7f7f7; padding:12px; border-radius:8px; }
-    table { margin-top: 12px; border-collapse: collapse; }
-    th, td { padding: 6px 10px; border: 1px solid #ddd; }
+    :root{
+      --bg1:#eaf4ff;
+      --bg2:#fff3e6;
+      --panel:#ffffffcc;
+      --ink:#222;
+      --muted:#666;
+      --accent:#3b82f6;
+    }
+
+    body{
+      margin:0; padding:24px;
+      min-height:100vh;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans", sans-serif;
+      color:var(--ink);
+      background:
+        radial-gradient(1200px 1200px at 10% -10%, var(--bg1), transparent 45%),
+        radial-gradient(1100px 1100px at 110% 5%, var(--bg2), transparent 45%),
+        linear-gradient(180deg, #f8fbff 0%, #f6f6ff 100%);
+      background-attachment: fixed, fixed, fixed;
+    }
+    body::before{
+      content:"";
+      position:fixed; inset:0; pointer-events:none;
+      background:
+        repeating-linear-gradient(0deg, rgba(0,0,0,0.02) 0 1px, transparent 1px 40px),
+        repeating-linear-gradient(90deg, rgba(0,0,0,0.02) 0 1px, transparent 1px 40px);
+      mask: linear-gradient(#000, transparent 80%);
+    }
+
+    .board{
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 24px 24px 32px;
+      background: var(--panel);
+      backdrop-filter: blur(6px);
+      border-radius: 16px;
+      box-shadow:
+        0 10px 30px rgba(0,0,0,0.08),
+        0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    h1{
+      margin: 4px 0 12px;
+      font-size: 28px; font-weight: 800;
+      letter-spacing: -0.3px;
+      display:flex; align-items:center; gap:8px;
+    }
+    h1::after{
+      content:"";
+      flex:1; height:2px;
+      background: linear-gradient(90deg, var(--accent), transparent);
+      border-radius:2px;
+    }
+
+    .actions{ display:flex; gap:8px; margin:16px 0; flex-wrap:wrap; }
+    .actions input, .actions button{
+      padding:10px 12px; border-radius:10px; border:1px solid #e5e7eb; outline:none;
+      background:#fff; color:#111;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+    }
+    .actions button{
+      background: var(--accent); color:white; border:none;
+      cursor:pointer; transition: transform .04s ease, box-shadow .2s ease;
+      box-shadow: 0 4px 14px rgba(59,130,246,.25);
+    }
+    .actions button:hover{ transform: translateY(-1px); }
+    .actions button:active{ transform: translateY(0); }
+
+    #chart1, #chart2{
+      background:#fff; border-radius:14px; padding:8px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+    }
+
+    table{ width:100%; margin-top:12px; border-collapse:collapse; background:#fff; border-radius:12px; overflow:hidden; }
+    thead th{
+      background:#f1f5ff; color:#1f2937; text-align:left; font-weight:700; padding:10px;
+      border-bottom:1px solid #e5e7eb;
+    }
+    tbody td{ padding:10px; border-bottom:1px solid #f1f5f9; }
+    tbody tr:nth-child(even){ background:#fafbff; }
+    tbody tr:first-child td{ font-weight:700; }
+
+    #log{
+      white-space: pre-wrap; background:#fff; padding:12px; border-radius:12px;
+      border:1px solid #eef2ff; color:var(--muted);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+
+    .section {
+      background: rgba(255,255,255,0.9);
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.03);
+    }
+    .section h2 {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--accent);
+      margin: 0 0 12px 0;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .section h2::before { content: "🔹"; font-size: 16px; }
+
+    /* 1·2학년 레이아웃 (큰 화면에서 좌우 배치) */
+    .grades{
+      display:grid; gap:16px; grid-template-columns: 1fr; 
+    }
+    @media (min-width: 980px){
+      .grades{ grid-template-columns: 1fr 1fr; }
+    }
   </style>
 </head>
+
 <body>
-  <h1>반별 현황판 📊</h1>
+  <header style="text-align:center;font-size:18px;font-weight:600;color:#3b82f6;margin-bottom:12px;letter-spacing:0.5px;">
+    🌱 Green-Sail 환경 챌린지 현황판
+  </header>
 
-  <!-- 🔎 필터 UI -->
-  <div class="actions" style="gap:8px; flex-wrap:wrap; margin-bottom:6px">
-    <input id="filterStart" type="date" />
-    <input id="filterEnd" type="date" />
-    <input id="filterClass" placeholder="반 (예: 2-1, 비우면 전체)" />
-    <button id="btnThisWeek">이번 주</button>
-    <button id="btnThisMonth">이번 달</button>
-    <button id="btnClear">전체</button>
-    <button id="btnApply">필터 적용</button>
+  <div class="board">
+    <h1>반별 현황판 📊</h1>
+
+    <!-- 🔍 데이터 필터 구역 -->
+    <div class="section">
+      <h2>데이터 필터</h2>
+      <div class="actions">
+        <input id="filterStart" type="date" />
+        <input id="filterEnd" type="date" />
+        <input id="filterClass" placeholder="반 (예: 1-3, 2-1 / 비우면 전체)" />
+        <button id="btnThisWeek">이번 주</button>
+        <button id="btnThisMonth">이번 달</button>
+        <button id="btnClear">전체</button>
+        <button id="btnApply">필터 적용</button>
+      </div>
+    </div>
+
+    <!-- 📝 데이터 입력 -->
+    <div class="section">
+      <h2>데이터 입력</h2>
+      <div class="actions">
+        <input id="cls" placeholder="반 (예: 1-1 또는 2-1)" />
+        <input id="date" type="date" />
+        <input id="tumbler" type="number" min="0" placeholder="텀블러" />
+        <input id="lightOff" type="number" min="0" placeholder="소등" />
+        <input id="zeroWaste" type="number" min="0" placeholder="제로웨이스트" />
+        <button id="addReal">추가</button>
+      </div>
+    </div>
+
+    <!-- ⚙️ 데이터 관리 -->
+    <div class="section">
+      <h2>데이터 관리</h2>
+      <div class="actions">
+        <button id="addTest">테스트 데이터 추가</button>
+        <button id="loadBtn">데이터 불러오기</button>
+        <button id="deleteAll">전체 데이터 삭제</button>
+        <button id="deleteByClass">반별 삭제</button>
+      </div>
+    </div>
+
+    <!-- 📊 1·2학년 차트 & 순위 (좌우 분리) -->
+    <div class="grades">
+      <!-- 1학년 -->
+      <div class="section">
+        <h2>📈 1학년 반별 참여도</h2>
+        <canvas id="chart1" width="520" height="320"></canvas>
+        <h3 style="margin-top:12px;">1학년 순위</h3>
+        <table id="rank1">
+          <thead><tr><th>순위</th><th>반</th><th>합계</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <!-- 2학년 -->
+      <div class="section">
+        <h2>📈 2학년 반별 참여도</h2>
+        <canvas id="chart2" width="520" height="320"></canvas>
+        <h3 style="margin-top:12px;">2학년 순위</h3>
+        <table id="rank2">
+          <thead><tr><th>순위</th><th>반</th><th>합계</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <h3>로그</h3>
+    <div id="log">준비됨…</div>
   </div>
-
-  <!-- 입력 폼 -->
-  <div class="actions" style="margin-bottom:10px">
-    <input id="cls" placeholder="반 (예: 2-1)" />
-    <input id="date" type="date" />
-    <input id="tumbler" type="number" min="0" placeholder="텀블러" />
-    <input id="lightOff" type="number" min="0" placeholder="소등" />
-    <input id="zeroWaste" type="number" min="0" placeholder="제로웨이스트" />
-    <button id="addReal">추가</button>
-  </div>
-
-  <!-- 테스트/불러오기 버튼 -->
-  <div class="actions">
-    <button id="addTest">테스트 데이터 추가</button>
-    <button id="loadBtn">데이터 불러오기</button>
-  </div>
-
-  <canvas id="myChart" width="600" height="360"></canvas>
-
-  <h3>반별 순위</h3>
-  <table id="rank" style="min-width:320px">
-    <thead>
-      <tr><th>순위</th><th>반</th><th>합계</th></tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-
-  <h3>로그</h3>
-  <div id="log">준비됨…</div>
 
   <script type="module">
     import {
@@ -61,330 +203,197 @@
       getAllRecordsOrdered,
       getWeeklyTotal,
       upsertRecordByKey,
-      getRecordsByRangeAndClass
+      getRecordsByRangeAndClass,
+      deleteAllRecords,
+      deleteRecordsByClass
     } from './app-firebase.js';
 
-    // 로그 출력
-    const log = (...args) => {
-      const el = document.getElementById('log');
-      el.textContent = args.map(a => (typeof a === 'object' ? JSON.stringify(a, null, 2) : String(a))).join('\n');
-      console.log(...args);
-    };
+    /* 공용 로그 */
+    const log = (...a)=>{const e=document.getElementById('log');e.textContent=a.map(x=>typeof x==='object'?JSON.stringify(x,null,2):String(x)).join('\n');console.log(...a)};
 
-    /*******************************
-     * 1) 값 라벨 플러그인 (겹침 방지)
-     *******************************/
-    const valueLabelPlugin = {
-      id: 'valueLabel',
-      afterDatasetsDraw(chart) {
+    /* 값 라벨 플러그인 (막대 위 숫자) */
+    const valueLabelPlugin={
+      id:'valueLabel',
+      afterDatasetsDraw(chart){
         const { ctx, scales } = chart;
         const ds = chart.data.datasets[0];
         const meta = chart.getDatasetMeta(0);
         if (!ds || !meta) return;
-
         const baseY = scales.y?.getPixelForValue ? scales.y.getPixelForValue(0) : null;
-
         ctx.save();
-        meta.data.forEach((bar, i) => {
+        meta.data.forEach((bar,i)=>{
           const v = ds.data[i];
-          if (v == null || !bar) return;
-
-          // 막대 높이(픽셀)로 안/밖 표시 위치 결정
-          const barHeight = (baseY != null) ? (baseY - bar.y) : 0;
-
-          let x = bar.x;
-          let y;
-          let color;
-          if (barHeight >= 24) {
-            y = bar.y + 14;    // 막대 안쪽
-            color = '#fff';
-          } else {
-            y = bar.y - 10;    // 막대 위
-            color = '#333';
-          }
-
-          ctx.font = '12px system-ui';
-          ctx.textAlign = 'center';
-          ctx.fillStyle = color;
+          if (v==null || !bar) return;
+          const bh = (baseY!=null)?(baseY-bar.y):0;
+          const x=bar.x, y = bh>=24 ? bar.y+14 : bar.y-10;
+          ctx.font='12px system-ui';
+          ctx.textAlign='center';
+          ctx.fillStyle = bh>=24 ? '#fff' : '#333';
           ctx.fillText(String(v), x, y);
         });
         ctx.restore();
       }
     };
-    Chart.register(valueLabelPlugin); // 전역 1회 등록
+    Chart.register(valueLabelPlugin);
 
-    /*******************************
-     * 2) 차트 생성 (툴팁 OFF, 여백 ↑)
-     *******************************/
-    const ctx = document.getElementById('myChart').getContext('2d');
-
-    // 필요시 툴팁을 켜고 싶다면 true로 변경
-    const TOOLTIP_ON = false;
-
-    const chart = new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels: [],
-        datasets: [{
-          label: '합계(텀블러+소등+제로웨이스트)',
-          data: [],
-          borderWidth: 2
-        }]
-      },
-      options: {
-        responsive: true,
-        layout: { padding: { top: 36 } },   // 제목/라벨 여유
-        animation: { duration: 800, easing: 'easeOutQuart' },
-        plugins: {
-          legend: { display: false },
-          title: { display: true, text: '반별 합계' },
-          tooltip: {
-            enabled: TOOLTIP_ON,
-            yAlign: 'bottom',
-            xAlign: 'center',
-            caretPadding: 10,
-            displayColors: false,
-            callbacks: {
-              label: (ctx) => ` 합계: ${ctx.parsed.y}`,
-              afterLabel: (ctx) => ` (반: ${ctx.label})`
-            }
-          }
-        },
-        scales: {
-          y: {
-            beginAtZero: true,
-            ticks: { stepSize: 1 }
-          }
-        },
-        // 바 클릭 → 필터 연동 (있으면)
-        onClick: (evt, elements) => {
-          if (!elements.length) return;
-          const index = elements[0].index;
-          const cls = chart.data.labels[index];
-          const input = document.getElementById('filterClass');
-          if (input) {
-            input.value = cls;
-            if (typeof applyFilters === 'function') applyFilters();
-          }
-        }
+    /* 차트 2개 초기화 */
+    const chart1 = new Chart(document.getElementById('chart1').getContext('2d'), {
+      type:'bar',
+      data:{ labels:[], datasets:[{ label:'1학년 합계', data:[], borderWidth:2 }]},
+      options:{
+        responsive:true,
+        layout:{ padding:{ top:24 }},
+        plugins:{ legend:{ display:false }, title:{ display:true, text:'1학년 반별 합계' } },
+        scales:{ y:{ beginAtZero:true, ticks:{ stepSize:1 }}}
       }
     });
 
-    /************************************
-   /************************************
- * 3) Top3 색 강조 + Y축 여유 + 업데이트
- ************************************/
-function renderChart(labels, values) {
-  const n = values.length;
-  const safeValues = values.map(v => Number(v) || 0);
-  const max = n ? Math.max(...safeValues) : 0;
-
-  // 상위 3개 인덱스 계산 (값이 같으면 먼저 나온 항목이 우선)
-  const order = safeValues
-    .map((v, i) => ({ v, i }))
-    .sort((a, b) => b.v - a.v);
-  const topIdx = order.slice(0, 3).map(o => o.i);
-
-  // 배경/테두리 색: 🥇금 / 🥈은 / 🥉동 / 기본
-  const bg = safeValues.map((v, i) => {
-    if (i === topIdx[0]) return 'rgba(255, 205, 86, 0.7)';   // 금 (노랑)
-    if (i === topIdx[1]) return 'rgba(201, 203, 207, 0.7)';  // 은 (회백)
-    if (i === topIdx[2]) return 'rgba(205, 127, 50, 0.7)';   // 동 (브론즈)
-    return 'rgba(54, 162, 235, 0.5)';                        // 기본(파랑)
-  });
-  const border = safeValues.map((v, i) => {
-    if (i === topIdx[0]) return 'rgba(255, 159, 64, 1)';     // 금 테두리
-    if (i === topIdx[1]) return 'rgba(128, 128, 128, 1)';    // 은 테두리
-    if (i === topIdx[2]) return 'rgba(139, 69, 19, 1)';      // 동 테두리
-    return 'rgba(54, 162, 235, 1)';                          // 기본
-  });
-
-  chart.data.labels = labels;
-  chart.data.datasets[0].data = safeValues;
-  chart.data.datasets[0].backgroundColor = bg;
-  chart.data.datasets[0].borderColor = border;
-
-  // Y축 상단 여유(최대값의 10% 또는 최소 5)
-  chart.options.scales.y.suggestedMax = Math.max(5, Math.ceil(max * 1.1));
-  chart.update();
-}
-
-
-    // ===================== 기능 버튼들 =====================
-
-    // 테스트 데이터 추가
-    document.getElementById('addTest').addEventListener('click', async () => {
-      try {
-        const now = new Date().toISOString().slice(0,10);
-        await addRecord({ date: now, class: "2-1", tumbler: 1, lightOff: 1, zeroWaste: 0 });
-        log('✅ 테스트 데이터 추가 완료!');
-      } catch (e) { log('❌ 추가 실패:', e.message); }
-    });
-
-    // 데이터 불러오기 (+순위표 렌더)
-    document.getElementById('loadBtn').addEventListener('click', async () => {
-      try {
-        const records = await getAllRecordsOrdered();   // 정렬해서 읽기
-        log('✅ 불러오기 성공(정렬):', records);
-
-        // 🔹 차트 데이터 계산 → 렌더
-        const labels = records.map(r => r.class || r.date);
-        const values = records.map(r => (r.tumbler||0) + (r.lightOff||0) + (r.zeroWaste||0));
-        renderChart(labels, values);
-
-        // 🔹 반별 합계 집계 → 순위표
-        const byClass = {};
-        for (const r of records) {
-          const cls = r.class || '미지정';
-          const sum = (r.tumbler||0) + (r.lightOff||0) + (r.zeroWaste||0);
-          byClass[cls] = (byClass[cls] || 0) + sum;
-        }
-        const rank = Object.entries(byClass)
-          .map(([cls,total]) => ({ cls, total }))
-          .sort((a,b) => b.total - a.total);
-
-        const tbody = document.querySelector('#rank tbody');
-        tbody.innerHTML = rank.length === 0
-  ? `<tr><td colspan="3" style="text-align:center;color:#888;">데이터가 없습니다</td></tr>`
-  : rank.map((r,i)=> {
-      const badge = i===0 ? '🥇' : i===1 ? '🥈' : i===2 ? '🥉' : (i+1);
-      return `<tr><td>${badge}</td><td>${r.cls}</td><td>${r.total}</td></tr>`;
-    }).join('');
-
-        // (선택) 최근 7일 합계 로그
-        try {
-          const weekly = await getWeeklyTotal();
-          log('📈 최근 7일 합계:', weekly, '\n', records);
-        } catch (e) {
-          console.warn('주간합계 계산 중 경고:', e);
-        }
-
-      } catch (e) {
-        console.error(e);
-        log('❌ 불러오기 실패:', e.code || e.message);
+    const chart2 = new Chart(document.getElementById('chart2').getContext('2d'), {
+      type:'bar',
+      data:{ labels:[], datasets:[{ label:'2학년 합계', data:[], borderWidth:2 }]},
+      options:{
+        responsive:true,
+        layout:{ padding:{ top:24 }},
+        plugins:{ legend:{ display:false }, title:{ display:true, text:'2학년 반별 합계' } },
+        scales:{ y:{ beginAtZero:true, ticks:{ stepSize:1 }}}
       }
     });
 
-    // 입력 폼 → 업서트 저장 (중복 방지: 같은 날짜+반이면 덮어쓰기)
-    document.getElementById('addReal').addEventListener('click', async () => {
-      const d = document.getElementById('date').value || new Date().toISOString().slice(0,10);
-      const c = document.getElementById('cls').value || "2-1";
-      const t = Number(document.getElementById('tumbler').value || 0);
-      const l = Number(document.getElementById('lightOff').value || 0);
-      const z = Number(document.getElementById('zeroWaste').value || 0);
-
-      try {
-        const id = await upsertRecordByKey({ date: d, class: c, tumbler: t, lightOff: l, zeroWaste: z });
-        console.log('✅ 저장(업서트) 완료, id:', id);
-        alert(`저장 완료 (${id})`);
-      } catch (e) {
-        console.error(e);
-        alert('저장 실패: ' + (e.code || e.message));
-      }
-    });
-
-    // ====================== 필터 적용 로직 ======================
-    function fmt(d){ return d.toISOString().slice(0,10); }
-
-    function getThisWeekRange() {
-      const now = new Date();
-      const day = now.getDay();           // 0:일 ~ 6:토
-      const diffToMon = (day + 6) % 7;    // 월요일 기준
-      const monday = new Date(now);
-      monday.setDate(now.getDate() - diffToMon);
-      const sunday = new Date(monday);
-      sunday.setDate(monday.getDate() + 6);
-      return { start: fmt(monday), end: fmt(sunday) };
+    /* Top3 강조 + 차트 갱신 (공용) */
+    function paintTop3(chart, labels, values){
+      const s = values.map(v=>Number(v)||0);
+      const order = s.map((v,i)=>({v,i})).sort((a,b)=>b.v-a.v);
+      const top = order.slice(0,3).map(x=>x.i);
+      const bg = s.map((v,i)=> i===top[0] ? 'rgba(255,205,86,0.7)'
+                        : i===top[1] ? 'rgba(201,203,207,0.7)'
+                        : i===top[2] ? 'rgba(205,127,50,0.7)'
+                        : 'rgba(54,162,235,0.5)');
+      const bd = s.map((v,i)=> i===top[0] ? 'rgba(255,159,64,1)'
+                        : i===top[1] ? 'rgba(128,128,128,1)'
+                        : i===top[2] ? 'rgba(139,69,19,1)'
+                        : 'rgba(54,162,235,1)');
+      chart.data.labels = labels;
+      chart.data.datasets[0].data = s;
+      chart.data.datasets[0].backgroundColor = bg;
+      chart.data.datasets[0].borderColor = bd;
+      chart.update();
     }
 
-    function getThisMonthRange() {
-      const now = new Date();
-      const start = new Date(now.getFullYear(), now.getMonth(), 1);
-      const end   = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-      return { start: fmt(start), end: fmt(end) };
+    /* records → (labels, values) 변환 (반별 합산, 내림차순) */
+    function groupByClass(records){
+      const by={};
+      for(const r of records){
+        const c=r.class||'미지정';
+        const sum=(r.tumbler||0)+(r.lightOff||0)+(r.zeroWaste||0);
+        by[c]=(by[c]||0)+sum;
+      }
+      const sorted=Object.entries(by).sort((a,b)=>b[1]-a[1]);
+      return { labels:sorted.map(x=>x[0]), values:sorted.map(x=>x[1]), entries:sorted };
     }
 
-    async function applyFilters() {
+    /* 1·2학년 분리 렌더 */
+    function renderSeparated(records){
+      const first  = records.filter(r=>(r.class||'').startsWith('1-'));
+      const second = records.filter(r=>(r.class||'').startsWith('2-'));
+
+      const g1 = groupByClass(first);
+      const g2 = groupByClass(second);
+
+      paintTop3(chart1, g1.labels, g1.values);
+      paintTop3(chart2, g2.labels, g2.values);
+
+      // 순위표 렌더
+      const drawRank=(tbodySel, entries)=>{
+        const tb=document.querySelector(tbodySel);
+        tb.innerHTML = entries.length===0
+          ? `<tr><td colspan="3" style="text-align:center;color:#888;">데이터가 없습니다</td></tr>`
+          : entries.map(([cls,total],i)=>{
+              const badge = i===0 ? '🥇' : i===1 ? '🥈' : i===2 ? '🥉' : (i+1);
+              return `<tr><td>${badge}</td><td>${cls}</td><td>${total}</td></tr>`;
+            }).join('');
+      };
+      drawRank('#rank1 tbody', g1.entries);
+      drawRank('#rank2 tbody', g2.entries);
+    }
+
+    /* 버튼: 테스트 추가/업서트/불러오기 */
+    document.getElementById('addTest').onclick = async ()=>{
+      const now=new Date().toISOString().slice(0,10);
+      // 1학년/2학년 테스트 번갈아가며 추가
+      await addRecord({date:now, class:'1-1', tumbler:1, lightOff:0, zeroWaste:1});
+      await addRecord({date:now, class:'2-1', tumbler:0, lightOff:1, zeroWaste:1});
+      applyFilters();
+    };
+
+    document.getElementById('addReal').onclick = async ()=>{
+      const d=document.getElementById('date').value || new Date().toISOString().slice(0,10);
+      const c=document.getElementById('cls').value || '1-1';
+      const t=+document.getElementById('tumbler').value||0;
+      const l=+document.getElementById('lightOff').value||0;
+      const z=+document.getElementById('zeroWaste').value||0;
+      await upsertRecordByKey({date:d,class:c,tumbler:t,lightOff:l,zeroWaste:z});
+      applyFilters();
+    };
+
+    document.getElementById('loadBtn').onclick = ()=> applyFilters();
+
+    /* 필터 날짜 헬퍼 */
+    const fmt = d => d.toISOString().slice(0,10);
+    document.getElementById('btnThisWeek').onclick=()=>{
+      const n=new Date(); const m=new Date(n);
+      m.setDate(n.getDate()-(n.getDay()+6)%7);
+      const s=fmt(m), e=fmt(new Date(m.getFullYear(),m.getMonth(),m.getDate()+6));
+      document.getElementById('filterStart').value=s;
+      document.getElementById('filterEnd').value=e;
+      applyFilters();
+    };
+    document.getElementById('btnThisMonth').onclick=()=>{
+      const n=new Date();
+      const s=fmt(new Date(n.getFullYear(),n.getMonth(),1));
+      const e=fmt(new Date(n.getFullYear(),n.getMonth()+1,0));
+      document.getElementById('filterStart').value=s;
+      document.getElementById('filterEnd').value=e;
+      applyFilters();
+    };
+    document.getElementById('btnClear').onclick=()=>{
+      document.getElementById('filterStart').value='';
+      document.getElementById('filterEnd').value='';
+      document.getElementById('filterClass').value='';
+      applyFilters();
+    };
+    document.getElementById('btnApply').onclick=()=> applyFilters();
+
+    /* 삭제 */
+    document.getElementById('deleteAll').onclick = async ()=>{
+      if(!confirm('⚠️ 모든 데이터를 삭제할까요?')) return;
+      await deleteAllRecords(); applyFilters();
+    };
+    document.getElementById('deleteByClass').onclick = async ()=>{
+      const c=prompt('삭제할 반 이름을 입력하세요 (예: 1-1 또는 2-1)');
+      if(!c) return;
+      if(!confirm(`${c} 반의 데이터를 모두 삭제할까요?`)) return;
+      await deleteRecordsByClass(c); applyFilters();
+    };
+
+    /* 필터 적용 → Firestore 조회 → 1·2학년 분리 렌더 */
+    async function applyFilters(){
       const start = document.getElementById('filterStart').value || undefined;
       const end   = document.getElementById('filterEnd').value   || undefined;
       const cls   = (document.getElementById('filterClass').value || '').trim() || 'ALL';
-
-      try {
-        const records = await getRecordsByRangeAndClass({ startDate: start, endDate: end, cls });
-
+      try{
+        const records = await getRecordsByRangeAndClass({ startDate:start, endDate:end, cls });
         log('🔎 필터 결과:', { start, end, cls, count: records.length });
-
-        // 차트 갱신
-        const labels = records.map(r => r.class || r.date);
-        const values = records.map(r => (r.tumbler||0) + (r.lightOff||0) + (r.zeroWaste||0));
-        renderChart(labels, values);
-
-        // 순위표 갱신
-        const byClass = {};
-        for (const r of records) {
-          const c = r.class || '미지정';
-          const sum = (r.tumbler||0) + (r.lightOff||0) + (r.zeroWaste||0);
-          byClass[c] = (byClass[c] || 0) + sum;
-        }
-        const rank = Object.entries(byClass)
-          .map(([cls,total]) => ({ cls, total }))
-          .sort((a,b) => b.total - a.total);
-
-        const tbody = document.querySelector('#rank tbody');
-        tbody.innerHTML = rank.length === 0
-          ? `<tr><td colspan="3" style="text-align:center;color:#888;">데이터가 없습니다</td></tr>`
-          : rank.map((r,i)=> `<tr><td>${i===0 ? '🏆 1' : (i+1)}</td><td>${r.cls}</td><td>${r.total}</td></tr>`).join('');
-
-      } catch (e) {
+        renderSeparated(records);
+      }catch(e){
         console.error(e);
         alert('필터 적용 실패: ' + (e.code || e.message));
       }
     }
 
-    // 퀵버튼 이벤트
-    document.getElementById('btnThisWeek').addEventListener('click', () => {
-      const r = getThisWeekRange();
-      document.getElementById('filterStart').value = r.start;
-      document.getElementById('filterEnd').value   = r.end;
-      applyFilters();
-    });
-
-    document.getElementById('btnThisMonth').addEventListener('click', () => {
-      const r = getThisMonthRange();
-      document.getElementById('filterStart').value = r.start;
-      document.getElementById('filterEnd').value   = r.end;
-      applyFilters();
-    });
-
-    document.getElementById('btnClear').addEventListener('click', () => {
-      document.getElementById('filterStart').value = '';
-      document.getElementById('filterEnd').value   = '';
-      document.getElementById('filterClass').value = '';
-      applyFilters();
-    });
-
-    document.getElementById('btnApply').addEventListener('click', () => {
-      applyFilters();
-    });
-
-    // 페이지 처음 로드 시 전체 데이터로 초기화
+    // 자동 새로고침 (15초)
+    setInterval(()=>applyFilters(), 15000);
+    // 최초 로드
     applyFilters();
-    
-    /***********************
- * 자동 새로고침 (15초)
- ***********************/
-const AUTO_REFRESH_MS = 15000;
-
-// 필터가 있으면 필터 기준으로, 없으면 기본 불러오기 버튼 클릭
-setInterval(() => {
-  if (typeof applyFilters === 'function') {
-    applyFilters();
-  } else {
-    document.getElementById('loadBtn')?.click();
-  }
-}, AUTO_REFRESH_MS);
-
-    // ===========================================================
   </script>
 </body>
 </html>
