@@ -1,14 +1,38 @@
 /* ✅ 공통 폰트 */
-@font-face{
-  font-family:'NanumSquare';
-  src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2107@1.1/NanumSquare-Regular.woff') format('woff');
-  font-weight:400; font-style:normal;
+/* 1. 나눔스퀘어 (기본 폰트) */
+@font-face {
+    font-family: 'NanumSquare';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2107@1.1/NanumSquare-Regular.woff') format('woff');
+    font-weight: 400; /* 보통 */
+    font-style: normal;
 }
-@font-face{
-  font-family:'NanumSquare';
-  src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2107@1.1/NanumSquare-Bold.woff') format('woff');
-  font-weight:700; font-style:normal;
+@font-face {
+    font-family: 'NanumSquare';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2107@1.1/NanumSquare-Bold.woff') format('woff');
+    font-weight: 700; /* 굵게 */
+    font-style: normal;
 }
+
+/* 2. 나눔스퀘어 라운드 (Hero1 전용 폰트) */
+@font-face {
+    font-family: 'NanumSquareRound';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_two@1.0/NanumSquareRound.woff') format('woff');
+    font-weight: 400; /* 보통 */
+    font-style: normal;
+}
+@font-face {
+    font-family: 'NanumSquareRound';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_two@1.0/NanumSquareRoundB.woff') format('woff');
+    font-weight: 700; /* 굵게 */
+    font-style: normal;
+}
+@font-face {
+    font-family: 'NanumSquareRound';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_two@1.0/NanumSquareRoundEB.woff') format('woff');
+    font-weight: 800; /* 👈 아주 굵은 굵기 (ExtraBold) */
+    font-style: normal;
+}
+
 
 /* === 컬러 변수 === */
 :root{
@@ -23,15 +47,15 @@
 *{box-sizing:border-box}
 body{
   margin:0; font-family:'NanumSquare', sans-serif; color:var(--ink);
-  background: radial-gradient(120% 90% at 50% 0%, var(--deep2), var(--deep1) 50%) fixed,
-              linear-gradient(180deg, var(--deep1), var(--deep3)) fixed;
+  background: /* radial-gradient(120% 90% at 50% 0%, var(--deep2), var(--deep1) 50%) fixed, */
+              linear-gradient(180deg, #2E8A99 0% /* 밝은 바다 표면 (0%) */, var(--deep3) 30% /* 중간 깊이 바다 (30% 지점) */, var(--deep1) 100%/* 가장 어두운 심해 (100%) */);
   overflow-x:hidden;
   min-height:100vh;
 }
 
 /* 공통 레이아웃 */
 .wrap{max-width:1100px; margin:0 auto; padding:0 20px}
-.spacer{height:14vh}
+.spacer{height:100vh}   /*14*/
 
 /* 페이드인 애니메이션 */
 .fade{opacity:0; transform:translateY(16px); transition:opacity 1s ease, transform 1s ease}
@@ -40,10 +64,11 @@ body{
 /* Hero 영역 */
 .hero1{
   min-height:100vh; display:flex; align-items:flex-start; padding-top:20vh; position:relative;
+  font-family: 'NanumSquareRound', sans-serif !important; /* ✅ 이 한 줄을 추가해주세요! */
 }
 .hero1 h1{
-  font-size:clamp(28px,5.6vw,64px); margin:0 0 20px; font-weight:700;
-  text-shadow:0 8px 36px rgba(0,0,0,.4)
+  font-size:clamp(28px,5.6vw,64px); margin:0 0 20px; 
+  text-shadow:0 8px 36px rgba(0,0,0,.4); font-weight:700;
 }
 .hero1 p.sub{font-size:clamp(14px,2.2vw,20px); opacity:.9}
 
@@ -208,6 +233,7 @@ body{
     display: grid; /* 그리드 레이아웃 사용 선언 */
     grid-template-columns: repeat(3, 1fr); /* 1fr짜리 칸막이를 3개 만듦 (동일한 크기의 3열) */
     gap: 20px; /* 카드 사이의 간격 */
+    padding-bottom: 10vh; /* 카드 아래쪽 여백 */
 }
 
 /* --- 반응형 설정 (모바일 화면) --- */
