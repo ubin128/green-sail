@@ -57,7 +57,7 @@
       <div class="eco-top">
         <div class="eco-icon">🌿</div>
         <div>
-          <div class="eco-title">오늘 우리 학교가 줄인 탄소</div>
+          <div class="eco-title">우리 학교가 줄인 총 탄소 절감량</div>
           <div class="eco-metric">
             <span id="co2Num" class="eco-num">0.00</span><span class="eco-unit">kg CO₂</span>
           </div>
@@ -181,59 +181,66 @@
 
        // Eco HUD
     (function(){
-      const hud = document.getElementById('ecoHud');
-      const co2Num = document.getElementById('co2Num');
-      const ring = document.getElementById('ringProg');
-      const ringTxt = document.getElementById('ringTxt');
-      const tipBox = document.getElementById('tipBox');
+    const hud = document.getElementById('ecoHud');
+    const co2Num = document.getElementById('co2Num');
+    const ring = document.getElementById('ringProg');
+    const ringTxt = document.getElementById('ringTxt');
+    const tipBox = document.getElementById('tipBox');
 
-      const todayKey = new Date().toISOString().slice(0,10) + '_gs_saved';
-      const saved = parseFloat(localStorage.getItem('gs_saved_kg_today') || localStorage.getItem(todayKey) || '0') || 0;
-      const GOAL = 20;
+    // ✅ 캠페인 전체 누적량을 저장하는 키를 사용
+    const CAMPAIGN_TOTAL_KEY = 'gs_campaign_total_saved';
+    const saved = parseFloat(localStorage.getItem(CAMPAIGN_TOTAL_KEY) || '0') || 0;
+    
+    // ✅ 4일간의 총 목표량으로 설정 (예: 20kg)
+    const GOAL = 20;
 
-      function animateValue(el, start, end, dur){
+    // 숫자 애니메이션 (기존과 동일)
+    function animateValue(el, start, end, dur){
         const st = performance.now();
         function f(now){
-          const t = Math.min(1, (now - st)/dur);
-          const e = t < .5 ? 2*t*t : 1 - Math.pow(-2*t+2,2)/2;
-          el.textContent = (start + (end - start) * e).toFixed(2);
-          if(t < 1) requestAnimationFrame(f);
+            const t = Math.min(1, (now - st)/dur);
+            const e = t < .5 ? 2*t*t : 1 - Math.pow(-2*t+2,2)/2;
+            el.textContent = (start + (end - start) * e).toFixed(2);
+            if(t < 1) requestAnimationFrame(f);
         }
         requestAnimationFrame(f);
-      }
-      animateValue(co2Num, 0, saved, 900);
+    }
+    animateValue(co2Num, 0, saved, 900);
 
-      const C = 2*Math.PI*36;
-      const pct = Math.max(0, Math.min(100, Math.round(saved/GOAL*100)));
-      ring.style.strokeDasharray = C;
-      ring.style.strokeDashoffset = C;
-      requestAnimationFrame(()=>{
+    // 링 그래프 (기존과 동일)
+    const C = 2*Math.PI*36;
+    const pct = Math.max(0, Math.min(100, Math.round(saved/GOAL*100)));
+    ring.style.strokeDasharray = C;
+    ring.style.strokeDashoffset = C;
+    requestAnimationFrame(()=>{
         ring.style.transition = 'stroke-dashoffset .9s ease';
         ring.style.strokeDashoffset = C * (1 - pct/100);
         ringTxt.textContent = pct + '%';
-      });
+    });
 
-      const tips = [
-        '물 끓일 땐 뚜껑! 가스·전기 절감 효과 👍',
+    // ✅ --- 팁 롤링 기능 다시 추가 ---
+    const tips = [
+        '물 끓일 땐 뚜껑을! 가스·전기 절감 효과 👍',
         '엘리베이터 대신 계단 오르면 CO₂와 건강 동시 케어',
         '분리수거 전, 페트병 라벨 제거 & 압축 시 재활용률 ↑',
-        '충전 끝난 어댑터 뽑기_ 대기전력도 전기예요 ⚡',
+        '충전 끝난 어댑터 뽑기. 대기전력도 전기예요 ⚡',
         '텀블러/머그 사용은 일회용 절감! => 지구에 +1',
         '가까운 거리는 도보/자전거! 탄소도 줄고 기분도 상쾌 🚴'
-      ];
-      let tipIdx = Math.floor(Math.random()*tips.length);
-      function nextTip(){
+    ];
+    let tipIdx = Math.floor(Math.random()*tips.length);
+    function nextTip(){
         tipIdx = (tipIdx+1) % tips.length;
         tipBox.style.opacity = .2;
         setTimeout(()=>{
-          tipBox.innerHTML = '<strong>Tip:</strong> ' + tips[tipIdx];
-          tipBox.style.opacity = 1;
+            tipBox.innerHTML = '<strong>Tip:</strong> ' + tips[tipIdx];
+            tipBox.style.opacity = 1;
         }, 250);
-      }
-      setInterval(nextTip, 6000);
+    }
+    setInterval(nextTip, 6000);
+    // --- 팁 롤링 기능 끝 ---
 
-      if(hud) setTimeout(()=>hud.classList.add('visible'), 400);
-    })();
+    if(hud) setTimeout(()=>hud.classList.add('visible'), 400);
+})();
 </script>
 
 </body>
