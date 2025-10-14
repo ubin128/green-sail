@@ -187,9 +187,22 @@
     const ringTxt = document.getElementById('ringTxt');
     const tipBox = document.getElementById('tipBox');
 
-    // ✅ 캠페인 전체 누적량을 저장하는 키를 사용
-    const CAMPAIGN_TOTAL_KEY = 'gs_campaign_total_saved';
-    const saved = parseFloat(localStorage.getItem(CAMPAIGN_TOTAL_KEY) || '0') || 0;
+     // ✅ --- 여기가 핵심: 총합을 직접 계산하는 로직 ---
+    const DB_KEY = 'greenSailData';
+    const allData = JSON.parse(localStorage.getItem(DB_KEY) || '{}');
+    let totalSaved = 0;
+
+    // 모든 날짜를 순회
+    for (const date in allData) {
+        // 해당 날짜의 모든 학생 기록을 순회
+        for (const studentId in allData[date]) {
+            // 각 학생의 totalKg 값을 더함
+            totalSaved += allData[date][studentId].totalKg || 0;
+        }
+    }
+    const saved = totalSaved; // 계산된 총합을 'saved' 변수에 저장
+    // --- 계산 로직 끝 ---
+
     
     // ✅ 4일간의 총 목표량으로 설정 (예: 20kg)
     const GOAL = 20;

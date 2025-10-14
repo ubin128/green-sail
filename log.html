@@ -92,6 +92,59 @@
             padding: 8px 12px; border-radius: 8px; transition: background-color .2s ease;
         }
         .btn-link:hover { background-color: rgba(59,130,246,.1); }
+
+#past-records-container {
+    display: grid;
+    gap: 16px; /* 기록 카드 사이의 간격 */
+    margin-bottom: 32px; /* '오늘의 기록'과의 간격 */
+}
+
+.summary-box {
+    background: #f1f5f9; /* 약간 회색빛 배경 */
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 24px;
+}
+.summary-box h2 {
+    margin: 0 0 12px;
+    font-size: 18px;
+    color: #334155;
+    border-bottom: 1px solid #cbd5e1;
+    padding-bottom: 8px;
+}
+.summary-box ul {
+    list-style-type: '✔️ ';
+    padding-left: 20px;
+    margin: 0 0 12px;
+    font-size: 15px;
+    color: #475569;
+}
+.summary-box .summary-total {
+    font-weight: bold;
+    text-align: right;
+    font-size: 16px;
+    color: var(--accent);
+}
+.student-input-area {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 24px;
+}
+.student-input-area input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 16px;
+    text-align: center;
+}
+/* 입력 필드에 포커스될 때 테두리 스타일 */
+.student-input-area input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
     </style>
 </head>
 <body>
@@ -106,6 +159,12 @@
 
         <div class="datebox">
             <span id="todayStr"></span>
+        </div>
+
+        <div class="student-input-area">
+            <input type="number" id="studentGrade" placeholder="학년 (예: 1)" min="1" max="2">
+            <input type="number" id="studentClass" placeholder="반 (예: 3)" min="1">
+            <input type="number" id="studentNumber" placeholder="학번 (예: 15)">
         </div>
 
         <div class="grid" id="list">
@@ -164,47 +223,133 @@
         </div>
         <div class="note">※ 가중치(kg)는 프로젝트 예시치입니다. 학교/팀 기준에 맞게 조정하세요.</div>
         <div class="success" id="msg"></div>
-    </div>
+        
+        <div id="past-records-container">
+        </div>
 
+        </div>
+
+       
+    
     <script>
     // --- ⚙️ 캠페인 설정 ---
     const CAMPAIGN_DATES = ['2025-10-13', '2025-10-14', '2025-10-15', '2025-10-16'];
-    const CAMPAIGN_TOTAL_KEY = 'gs_campaign_total_saved'; // 전체 누적량을 저장할 키
+    const DB_KEY = 'greenSailData';
     // --- ⚙️ 설정 끝 ---
 
-    const todayStrEl = document.getElementById('todayStr');
     const list = document.getElementById('list');
     const sumEl = document.getElementById('sumKg');
     const MSG = document.getElementById('msg');
+    const gradeInput = document.getElementById('studentGrade');
+    const classInput = document.getElementById('studentClass');
+    const numberInput = document.getElementById('studentNumber');
+    const pastRecordsContainer = document.getElementById('past-records-container');
+    const container = document.querySelector('.container');
+    const btnSave = document.getElementById('btnSave');
+    const btnResetToday = document.getElementById('btnResetToday');
     
     const now = new Date();
-    const y = now.getFullYear();
-    const m = String(now.getMonth() + 1).padStart(2, '0');
-    const d = String(now.getDate()).padStart(2, '0');
-    const todayKey = `${y}-${m}-${d}`; // 오늘 날짜 키 (예: 2025-10-21)
+    const todayKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    document.getElementById('todayStr').textContent = `${now.getFullYear()}년 ${String(now.getMonth() + 1).padStart(2, '0')}월 ${String(now.getDate()).padStart(2, '0')}일`;
 
-    todayStrEl.textContent = `${y}년 ${m}월 ${d}일`;
+
+   /*  todayStrEl.textContent = `${y}년 ${m}월 ${d}일`; */
 
     // 캠페인 기간인지 확인
     const isCampaignPeriod = CAMPAIGN_DATES.includes(todayKey);
 
     if (!isCampaignPeriod) {
-        document.querySelector('.container').innerHTML += '<div style="background: #ffdddd; color: #d32f2f; padding: 20px; text-align: center; border-radius: 8px; margin-top: 20px; font-weight: bold;">캠페인 진행 기간(10/21 ~ 10/24)이 아닙니다.</div>';
+        container.innerHTML += '<div style="background: #ffdddd; color: #d32f2f; padding: 20px; text-align: center; border-radius: 8px; margin-top: 20px; font-weight: bold;">캠페인 진행 기간(10/21 ~ 10/24)이 아닙니다.</div>';
+        // 모든 입력 필드를 비활성화
         list.querySelectorAll('input').forEach(input => input.disabled = true);
-        document.getElementById('btnSave').disabled = true;
-        document.getElementById('btnResetToday').disabled = true;
+        gradeInput.disabled = true;
+        classInput.disabled = true;
+        numberInput.disabled = true;
+        btnSave.disabled = true;
+        btnResetToday.disabled = true;
     }
 
-    // 오늘 날짜의 저장된 값 불러와서 체크박스 복원
-    function loadTodayChecks() {
-        const savedData = JSON.parse(localStorage.getItem(todayKey) || '{}');
-        list.querySelectorAll('input[type="checkbox"]').forEach(ch => {
-            if (savedData[ch.id]) {
-                ch.checked = true;
+     // --- ✅ 확인 코드 끝 ---
+
+    // 전체 데이터 가져오기/저장하기
+    const getAllData = () => JSON.parse(localStorage.getItem(DB_KEY) || '{}');
+    const saveAllData = (data) => localStorage.setItem(DB_KEY, JSON.stringify(data));
+
+    // 학생 정보가 변경될 때마다 실행되는 메인 함수
+    function handleStudentInputChange() {
+        if (!isCampaignPeriod) return; // 캠페인 기간이 아니면 실행 중단
+
+        const grade = gradeInput.value;
+        const cls = classInput.value;
+        const num = numberInput.value;
+
+        if (!grade || !cls || !num) {
+            list.querySelectorAll('input').forEach(ch => { ch.checked = false; ch.disabled = true; });
+            pastRecordsContainer.innerHTML = '<div class="summary-box"><p style="text-align:center; color: var(--muted);">학년, 반, 학번을 모두 입력하면 기록을 조회할 수 있습니다.</p></div>';
+            calcSum();
+            return;
+        }
+        
+        list.querySelectorAll('input').forEach(ch => ch.disabled = false);
+        const studentId = `${grade}-${cls}-${num}`;
+
+        showStudentPastRecords(studentId);
+        loadStudentTodayRecord(studentId);
+    }
+
+
+// ✨ '나의 지난 모든 기록'을 보여주는 함수
+    function showStudentPastRecords(studentId) {
+        const allData = getAllData();
+        let pastRecordsHTML = '';
+
+        CAMPAIGN_DATES.forEach(dateKey => {
+            if (dateKey < todayKey && allData[dateKey] && allData[dateKey][studentId]) {
+                const record = allData[dateKey][studentId];
+                let checkedItemsHTML = '<ul>';
+                list.querySelectorAll('input[type="checkbox"]').forEach(ch => {
+                    if (record.checks.includes(ch.id)) {
+                        const label = document.querySelector(`label[for="${ch.id}"]`).textContent;
+                        checkedItemsHTML += `<li>${label}</li>`;
+                    }
+                });
+                checkedItemsHTML += '</ul>';
+                
+                const dateParts = dateKey.split('-');
+                pastRecordsHTML += `
+                    <div class="summary-box">
+                        <h2>${dateParts[1]}/${dateParts[2]} 기록</h2>
+                        ${checkedItemsHTML}
+                        <div class="summary-total">총 ${record.totalKg.toFixed(2)} kg CO₂ 절감</div>
+                    </div>
+                `;
             }
         });
+        pastRecordsContainer.innerHTML = pastRecordsHTML || '<div class="summary-box"><p style="color: var(--muted);">아직 지난 기록이 없습니다.</p></div>';
+    }
+
+    // '나의 오늘 기록'을 불러와 체크박스에 복원하는 함수
+    function loadStudentTodayRecord(studentId) {
+        const allData = getAllData();
+        if (allData[todayKey] && allData[todayKey][studentId]) {
+            const savedChecks = allData[todayKey][studentId].checks;
+            list.querySelectorAll('input[type="checkbox"]').forEach(ch => {
+                ch.checked = savedChecks.includes(ch.id);
+            });
+            MSG.textContent = `ℹ️ 이전에 저장한 기록을 불러왔습니다.`;
+            MSG.classList.add('show');
+        } else {
+            list.querySelectorAll('input').forEach(ch => ch.checked = false);
+            MSG.classList.remove('show');
+        }
         calcSum();
     }
+    
+    // 이벤트 리스너 연결
+    gradeInput.addEventListener('input', handleStudentInputChange);
+    classInput.addEventListener('input', handleStudentInputChange);
+    numberInput.addEventListener('input', handleStudentInputChange);
+    list.addEventListener('change', calcSum);
 
     // 합계 계산 함수
     function calcSum() {
@@ -215,57 +360,69 @@
         sumEl.textContent = sum.toFixed(2);
         return sum;
     }
-    list.addEventListener('change', calcSum);
 
-    // 저장 버튼 클릭 시
-    document.getElementById('btnSave').addEventListener('click', () => {
+    // 저장 버튼
+    btnSave.addEventListener('click', () => {
+        const grade = gradeInput.value;
+        const cls = classInput.value;
+        const num = numberInput.value;
+
+        if (!grade || !cls || !num) {
+            alert('학년, 반, 학번을 모두 입력해주세요.');
+            return;
+        }
+
+        const studentId = `${grade}-${cls}-${num}`;
+        const studentClass = `${grade}-${cls}`;
         const todaySum = calcSum();
-        const checksToSave = {};
-        
-        // 현재 체크된 항목들만 저장
-        list.querySelectorAll('input[type="checkbox"]:checked').forEach(ch => {
-            checksToSave[ch.id] = true;
-        });
-        localStorage.setItem(todayKey, JSON.stringify(checksToSave));
+        const checkedIds = Array.from(list.querySelectorAll('input[type="checkbox"]:checked')).map(ch => ch.id);
 
-        updateCampaignTotal(); // 전체 누적량 업데이트
+        const record = {
+            class: studentClass,
+            student: studentId,
+            date: todayKey,
+            checks: checkedIds,
+            totalKg: todaySum,
+        };
+
+        const allData = getAllData();
+        if (!allData[todayKey]) {
+            allData[todayKey] = {};
+        }
+        allData[todayKey][studentId] = record;
+        saveAllData(allData);
 
         MSG.classList.add('show');
-        MSG.textContent = `✅ 저장되었습니다! 오늘 기록: ${todaySum.toFixed(2)} kg CO₂`;
+        MSG.textContent = `✅ 저장되었습니다! 오늘 나의 기록: ${todaySum.toFixed(2)} kg CO₂`;
     });
     
     // 초기화 버튼
-    document.getElementById('btnResetToday').addEventListener('click', ()=>{
-        localStorage.removeItem(todayKey); // 오늘 기록만 삭제
-        list.querySelectorAll('input[type="checkbox"]').forEach(ch => ch.checked = false);
-        calcSum();
-        updateCampaignTotal(); // 전체 누적량 다시 계산
-        MSG.classList.add('show');
-        MSG.textContent = '♻️ 오늘 기록을 초기화했습니다.';
+    btnResetToday.addEventListener('click', () => {
+        const grade = gradeInput.value;
+        const cls = classInput.value;
+        const num = numberInput.value;
+
+        if (!grade || !cls || !num) {
+            alert('초기화할 학생의 정보를 먼저 입력해주세요.');
+            return;
+        }
+        const studentId = `${grade}-${cls}-${num}`;
+        const allData = getAllData();
+
+        if (allData[todayKey] && allData[todayKey][studentId]) {
+            delete allData[todayKey][studentId];
+            saveAllData(allData);
+            list.querySelectorAll('input').forEach(ch => ch.checked = false);
+            calcSum();
+            MSG.classList.add('show');
+            MSG.textContent = '♻️ 오늘 나의 기록을 초기화했습니다.';
+        } else {
+            alert('저장된 기록이 없습니다.');
+        }
     });
 
-    // 전체 누적량을 계산하고 저장하는 함수
-    function updateCampaignTotal() {
-        let totalSaved = 0;
-        const allCheckboxes = Array.from(document.querySelectorAll('#list input[type="checkbox"]'));
-
-        CAMPAIGN_DATES.forEach(dateKey => {
-            const dayData = JSON.parse(localStorage.getItem(dateKey) || '{}');
-            let daySum = 0;
-            allCheckboxes.forEach(ch => {
-                if (dayData[ch.id]) {
-                    daySum += parseFloat(ch.dataset.kg || '0');
-                }
-            });
-            totalSaved += daySum;
-        });
-        localStorage.setItem(CAMPAIGN_TOTAL_KEY, totalSaved.toString());
-    }
-
-    // 페이지 로드 시 오늘 기록 불러오기
-    if (isCampaignPeriod) {
-        loadTodayChecks();
-    }
+    // 페이지 첫 로드 시 실행
+    handleStudentInputChange();
 </script>
 </body>
 </html>
