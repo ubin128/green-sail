@@ -60,7 +60,7 @@
     }
 
     .actions{ display:flex; gap:8px; margin:16px 0; flex-wrap:wrap; }
-    .actions input, .actions button{
+    .actions input, .actions button, .actions select{
       padding:10px 12px; border-radius:10px; border:1px solid #e5e7eb; outline:none;
       background:#fff; color:#111;
       box-shadow: 0 1px 2px rgba(0,0,0,0.03);
@@ -112,13 +112,37 @@
     }
     .section h2::before { content: "🔹"; font-size: 16px; }
 
-    /* 1·2학년 레이아웃 (큰 화면에서 좌우 배치) */
     .grades{
       display:grid; gap:16px; grid-template-columns: 1fr; 
     }
     @media (min-width: 980px){
       .grades{ grid-template-columns: 1fr 1fr; }
     }
+
+    /* 🌊 오른쪽 아래에 고정되는 홈 버튼 */
+.floating-home-btn {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 52px;
+  height: 52px;
+  background: #3b82f6;
+  color: #fff;
+  font-size: 26px;
+  text-align: center;
+  line-height: 52px;
+  border-radius: 50%;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+  text-decoration: none;
+  transition: all 0.2s ease;
+  z-index: 999;
+}
+.floating-home-btn:hover {
+  background: #2563eb;
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+}
+
   </style>
 </head>
 
@@ -128,19 +152,37 @@
   </header>
 
   <div class="board">
-    <h1>반별 현황판 📊</h1>
+    <h1>
+  반별 현황판 📊
+</h1>
 
     <!-- 🔍 데이터 필터 구역 -->
     <div class="section">
       <h2>데이터 필터</h2>
-      <div class="actions">
-        <input id="filterStart" type="date" />
-        <input id="filterEnd" type="date" />
+      <div class="actions" id="filterBar" style="gap:8px; flex-wrap:wrap; align-items:center">
+        <strong style="margin-right:4px;">보기:</strong>
+        <label><input type="radio" name="mode" value="cumulative" id="modeCumulative" checked> 누적</label>
+        <label><input type="radio" name="mode" value="daily" id="modeDaily"> 하루</label>
+
+        <!-- 하루 보기 전용 -->
+        <span id="dailyInputs" style="display:none; gap:8px; align-items:center">
+          <label>날짜 <input id="viewDate" type="date" /></label>
+          <button id="btnToday" type="button">오늘</button>
+        </span>
+
+        <!-- 누적(기간) 보기 전용 -->
+        <span id="rangeInputs" style="display:inline-flex; gap:8px; align-items:center">
+          <label>시작 <input id="filterStart" type="date" /></label>
+          <label>끝 <input id="filterEnd" type="date" /></label>
+        </span>
+
         <input id="filterClass" placeholder="반 (예: 1-3, 2-1 / 비우면 전체)" />
-        <button id="btnThisWeek">이번 주</button>
-        <button id="btnThisMonth">이번 달</button>
-        <button id="btnClear">전체</button>
-        <button id="btnApply">필터 적용</button>
+
+        <!-- 누적 모드에서 쓰는 빠른 버튼들 -->
+        <button id="btnThisWeek" type="button">이번 주</button>
+        <button id="btnThisMonth" type="button">이번 달</button>
+        <button id="btnClear" type="button">전체</button>
+        <button id="btnApply" type="button">필터 적용</button>
       </div>
     </div>
 
@@ -153,7 +195,7 @@
         <input id="tumbler" type="number" min="0" placeholder="텀블러" />
         <input id="lightOff" type="number" min="0" placeholder="소등" />
         <input id="zeroWaste" type="number" min="0" placeholder="제로웨이스트" />
-        <button id="addReal">추가</button>
+        <button id="addReal" type="button">추가</button>
       </div>
     </div>
 
@@ -161,10 +203,10 @@
     <div class="section">
       <h2>데이터 관리</h2>
       <div class="actions">
-        <button id="addTest">테스트 데이터 추가</button>
-        <button id="loadBtn">데이터 불러오기</button>
-        <button id="deleteAll">전체 데이터 삭제</button>
-        <button id="deleteByClass">반별 삭제</button>
+        <button id="addTest" type="button">테스트 데이터 추가</button>
+        <button id="loadBtn" type="button">데이터 불러오기</button>
+        <button id="deleteAll" type="button">전체 데이터 삭제</button>
+        <button id="deleteByClass" type="button">반별 삭제</button>
       </div>
     </div>
 
@@ -200,18 +242,24 @@
   <script type="module">
     import {
       addRecord,
-      getAllRecordsOrdered,
-      getWeeklyTotal,
+      getAllRecordsOrdered,   // (미사용이어도 남겨둠: 필요시)
+      getWeeklyTotal,         // (미사용이어도 남겨둠: 필요시)
       upsertRecordByKey,
       getRecordsByRangeAndClass,
       deleteAllRecords,
       deleteRecordsByClass
     } from './app-firebase.js';
 
-    /* 공용 로그 */
-    const log = (...a)=>{const e=document.getElementById('log');e.textContent=a.map(x=>typeof x==='object'?JSON.stringify(x,null,2):String(x)).join('\n');console.log(...a)};
+    /* ====== 유틸 ====== */
+    const todayStr = () => new Date().toISOString().slice(0,10);
 
-    /* 값 라벨 플러그인 (막대 위 숫자) */
+    const log = (...a)=>{
+      const e=document.getElementById('log');
+      e.textContent=a.map(x=>typeof x==='object'?JSON.stringify(x,null,2):String(x)).join('\n');
+      console.log(...a);
+    };
+
+    /* ====== 값 라벨 플러그인 ====== */
     const valueLabelPlugin={
       id:'valueLabel',
       afterDatasetsDraw(chart){
@@ -236,7 +284,7 @@
     };
     Chart.register(valueLabelPlugin);
 
-    /* 차트 2개 초기화 */
+    /* ====== 차트 초기화 (1,2학년) ====== */
     const chart1 = new Chart(document.getElementById('chart1').getContext('2d'), {
       type:'bar',
       data:{ labels:[], datasets:[{ label:'1학년 합계', data:[], borderWidth:2 }]},
@@ -259,7 +307,7 @@
       }
     });
 
-    /* Top3 강조 + 차트 갱신 (공용) */
+    /* ====== Top3 강조 & 차트 갱신 ====== */
     function paintTop3(chart, labels, values){
       const s = values.map(v=>Number(v)||0);
       const order = s.map((v,i)=>({v,i})).sort((a,b)=>b.v-a.v);
@@ -279,7 +327,7 @@
       chart.update();
     }
 
-    /* records → (labels, values) 변환 (반별 합산, 내림차순) */
+    /* ====== 반별 합산 ====== */
     function groupByClass(records){
       const by={};
       for(const r of records){
@@ -291,7 +339,7 @@
       return { labels:sorted.map(x=>x[0]), values:sorted.map(x=>x[1]), entries:sorted };
     }
 
-    /* 1·2학년 분리 렌더 */
+    /* ====== 1·2학년 분리 렌더 ====== */
     function renderSeparated(records){
       const first  = records.filter(r=>(r.class||'').startsWith('1-'));
       const second = records.filter(r=>(r.class||'').startsWith('2-'));
@@ -302,7 +350,6 @@
       paintTop3(chart1, g1.labels, g1.values);
       paintTop3(chart2, g2.labels, g2.values);
 
-      // 순위표 렌더
       const drawRank=(tbodySel, entries)=>{
         const tb=document.querySelector(tbodySel);
         tb.innerHTML = entries.length===0
@@ -316,17 +363,34 @@
       drawRank('#rank2 tbody', g2.entries);
     }
 
-    /* 버튼: 테스트 추가/업서트/불러오기 */
+    /* ====== 모드/필터 UI ====== */
+    function getViewMode(){
+      return document.getElementById('modeDaily').checked ? 'daily' : 'cumulative';
+    }
+    function updateFilterUI(){
+      const mode = getViewMode();
+      const daily  = document.getElementById('dailyInputs');
+      const range  = document.getElementById('rangeInputs');
+      if (mode === 'daily') {
+        daily.style.display = 'inline-flex';
+        range.style.display = 'none';
+      } else {
+        daily.style.display = 'inline-flex'; // 둘 다 보이게 하고 싶다면 이 줄을 'none'으로 바꿔도 됨
+        daily.style.display = 'none';
+        range.style.display = 'inline-flex';
+      }
+    }
+
+    /* ====== 이벤트 바인딩 ====== */
     document.getElementById('addTest').onclick = async ()=>{
-      const now=new Date().toISOString().slice(0,10);
-      // 1학년/2학년 테스트 번갈아가며 추가
+      const now=todayStr();
       await addRecord({date:now, class:'1-1', tumbler:1, lightOff:0, zeroWaste:1});
       await addRecord({date:now, class:'2-1', tumbler:0, lightOff:1, zeroWaste:1});
       applyFilters();
     };
 
     document.getElementById('addReal').onclick = async ()=>{
-      const d=document.getElementById('date').value || new Date().toISOString().slice(0,10);
+      const d=document.getElementById('date').value || todayStr();
       const c=document.getElementById('cls').value || '1-1';
       const t=+document.getElementById('tumbler').value||0;
       const l=+document.getElementById('lightOff').value||0;
@@ -337,9 +401,25 @@
 
     document.getElementById('loadBtn').onclick = ()=> applyFilters();
 
-    /* 필터 날짜 헬퍼 */
+    // 라디오 전환 시 UI 갱신 + 즉시 반영
+    document.getElementById('modeDaily').addEventListener('change', ()=>{ updateFilterUI(); applyFilters(); });
+    document.getElementById('modeCumulative').addEventListener('change', ()=>{ updateFilterUI(); applyFilters(); });
+
+    // 오늘 버튼: 하루 모드로 전환 + 오늘 날짜
+    document.getElementById('btnToday').onclick = () => {
+      document.getElementById('modeDaily').checked = true;
+      updateFilterUI();
+      document.getElementById('viewDate').value = todayStr();
+      document.getElementById('filterStart').value = '';
+      document.getElementById('filterEnd').value   = '';
+      applyFilters();
+    };
+
+    // 기간 단축 버튼
     const fmt = d => d.toISOString().slice(0,10);
     document.getElementById('btnThisWeek').onclick=()=>{
+      document.getElementById('modeCumulative').checked = true; // 누적 모드로
+      updateFilterUI();
       const n=new Date(); const m=new Date(n);
       m.setDate(n.getDate()-(n.getDay()+6)%7);
       const s=fmt(m), e=fmt(new Date(m.getFullYear(),m.getMonth(),m.getDate()+6));
@@ -348,6 +428,8 @@
       applyFilters();
     };
     document.getElementById('btnThisMonth').onclick=()=>{
+      document.getElementById('modeCumulative').checked = true;
+      updateFilterUI();
       const n=new Date();
       const s=fmt(new Date(n.getFullYear(),n.getMonth(),1));
       const e=fmt(new Date(n.getFullYear(),n.getMonth()+1,0));
@@ -356,6 +438,8 @@
       applyFilters();
     };
     document.getElementById('btnClear').onclick=()=>{
+      document.getElementById('modeCumulative').checked = true;
+      updateFilterUI();
       document.getElementById('filterStart').value='';
       document.getElementById('filterEnd').value='';
       document.getElementById('filterClass').value='';
@@ -363,7 +447,7 @@
     };
     document.getElementById('btnApply').onclick=()=> applyFilters();
 
-    /* 삭제 */
+    // 삭제
     document.getElementById('deleteAll').onclick = async ()=>{
       if(!confirm('⚠️ 모든 데이터를 삭제할까요?')) return;
       await deleteAllRecords(); applyFilters();
@@ -375,14 +459,18 @@
       await deleteRecordsByClass(c); applyFilters();
     };
 
-    /* 필터 적용 → Firestore 조회 → 1·2학년 분리 렌더 */
+    /* ====== 필터 적용 ====== */
     async function applyFilters(){
-      const start = document.getElementById('filterStart').value || undefined;
-      const end   = document.getElementById('filterEnd').value   || undefined;
-      const cls   = (document.getElementById('filterClass').value || '').trim() || 'ALL';
+      const mode = getViewMode(); // 'daily' | 'cumulative'
+      const cls  = (document.getElementById('filterClass').value || '').trim() || 'ALL';
+
+      const day   = document.getElementById('viewDate').value || todayStr();
+      const start = (mode === 'daily') ? day : (document.getElementById('filterStart').value || undefined);
+      const end   = (mode === 'daily') ? day : (document.getElementById('filterEnd').value   || undefined);
+
       try{
         const records = await getRecordsByRangeAndClass({ startDate:start, endDate:end, cls });
-        log('🔎 필터 결과:', { start, end, cls, count: records.length });
+        log('🔎 필터 결과:', { mode, day: mode==='daily'?day:undefined, start, end, cls, count: records.length });
         renderSeparated(records);
       }catch(e){
         console.error(e);
@@ -390,10 +478,15 @@
       }
     }
 
-    // 자동 새로고침 (15초)
+    // 자동 새로고침 & 초기화
+    updateFilterUI();
     setInterval(()=>applyFilters(), 15000);
-    // 최초 로드
     applyFilters();
   </script>
+
+<a href="https://ubin128.github.io/green-sail/" class="floating-home-btn" title="홈으로 가기">🏠</a>
+
+
 </body>
 </html>
+
