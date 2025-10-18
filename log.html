@@ -154,17 +154,18 @@
             <a class="btn-link" href="index.html">← 홈으로</a>
         </header>
 
+
         <h1>오늘의 기록</h1>
-        <p class="sub">체크한 항목만큼 오늘의 탄소 절감량(kg CO₂)을 계산해 저장해요.</p>
+        <p class="sub">오늘 실천한 친환경 생활 습관을 체크해주세용 ( 양심적으로 할 것❗️ )</p>
 
         <div class="datebox">
             <span id="todayStr"></span>
         </div>
 
         <div class="student-input-area">
-            <input type="number" id="studentGrade" placeholder="학년 (예: 1)" min="1" max="2">
-            <input type="number" id="studentClass" placeholder="반 (예: 3)" min="1">
-            <input type="number" id="studentNumber" placeholder="학번 (예: 15)">
+            <input type="number" id="studentGrade" placeholder="학년 (예: 1학년)" min="1" max="2">
+            <input type="number" id="studentClass" placeholder="반 (예: 1반)" min="1" max="13">
+            <input type="number" id="studentNumber" placeholder="학번 (예: 1번)" min="1" max="40">
         </div>
 
         <div class="grid" id="list">
@@ -173,42 +174,84 @@
                     <input id="c_light" type="checkbox" data-kg="0.05">
                     <label for="c_light">불필요한 전등 끄기</label>
                 </div>
-                <small>빈 교실·집에서 전등 바로 끄기 (≈ 0.05 kg)</small>
+                <small>교실 LED 전등 여러 개 x 15분 소등 기준 환산 (≈ 0.02 kg)</small>
             </div>
             <div class="card">
                 <div class="item">
                     <input id="c_plug" type="checkbox" data-kg="0.03">
                     <label for="c_plug">사용하지 않는 어댑터/멀티탭 뽑기</label>
                 </div>
-                <small>대기전력 줄이기 (≈ 0.03 kg)</small>
+                <small>충전기/멀티탭 대기전력 절감(하루 평균 환산) (≈ 0.005 kg)</small>
             </div>
             <div class="card">
                 <div class="item">
                     <input id="c_stairs" type="checkbox" data-kg="0.03">
                     <label for="c_stairs">엘리베이터 대신 계단 이용</label>
                 </div>
-                <small>짧은 층간 이동 대체 (≈ 0.03 kg)</small>
+                <small>1인 3층 기준 (≈ 0.009 kg)</small>
             </div>
             <div class="card">
                 <div class="item">
                     <input id="c_transit" type="checkbox" data-kg="0.35">
                     <label for="c_transit">도보/자전거/대중교통 이용</label>
                 </div>
-                <small>단거리 승용차 대체 (≈ 0.35 kg)</small>
+                <small>단거리 승용차 대체 (≈ 0.24 kg/km)</small>
             </div>
             <div class="card">
                 <div class="item">
                     <input id="c_tumbler" type="checkbox" data-kg="0.06">
                     <label for="c_tumbler">텀블러/머그 사용</label>
                 </div>
-                <small>일회용 컵 1개 대체 (≈ 0.06 kg)</small>
+                <small>일회용 컵 1개 대체 + 컵 생산 및 폐기 포함 (≈ 0.08 kg)</small>
             </div>
             <div class="card">
                 <div class="item">
                     <input id="c_food" type="checkbox" data-kg="0.12">
                     <label for="c_food">잔반 줄이기</label>
                 </div>
-                <small>음식물 쓰레기 감축 (≈ 0.12 kg)</small>
+                <small>급식 잔반 감소량 기준 (≈ 0.12 kg)</small>
+            </div>
+            <div class="card">
+                <div class="item">
+                    <input id="c_food" type="checkbox" data-kg="0.12">
+                    <label for="c_food">양치, 세면 시 물 잠그기</label>
+                </div>
+                <small>양치컵 사용, 물 틀어두지 않기 (≈ 0.02 kg)</small>
+            </div>
+            <div class="card">
+                <div class="item">
+                    <input id="c_food" type="checkbox" data-kg="0.12">
+                    <label for="c_food">플라스틱, 캔, 종이 분리배출</label>
+                </div>
+                <small>분비배출 1회 실천 기준 (≈ 0.04 kg)</small>
+            </div>
+            <div class="card">
+                <div class="item">
+                    <input id="c_food" type="checkbox" data-kg="0.12">
+                    <label for="c_food">페트병 라벨 제거</label>
+                </div>
+                <small>(≈ 0.01 kg) // 재활용률 향상 !</small>
+            </div>
+            <div class="card">
+                <div class="item">
+                    <input id="c_food" type="checkbox" data-kg="0.12">
+                    <label for="c_food">실내 식물 가꾸기</label>
+                </div>
+                <small>공기 정화 및 미세먼지 감소 (≈ 0.02 kg)</small>
+            </div>
+            <div class="card">
+                <div class="item">
+                    <input id="c_food" type="checkbox" data-kg="0.12">
+                    <label for="c_food">친환경 제품 사용</label>
+                </div>
+                <small>ex. LED 조명, 친환경 세제, 지속 가능한 제품 (≈ 0.10 kg)</small>
+            </div>
+            <div class="card">
+                <div class="item">
+                    <input id="c_food" type="checkbox" data-kg="0.12">
+                    <label for="c_food">필요 없는 소비 줄이기 / 중고 물품 사용</label>
+                </div>
+                <small>제조 및 운송 과정에서 발생할 탄소 배출 예방 (≈ 0.7 kg)</small>
             </div>
         </div>
 
@@ -221,7 +264,7 @@
             <button class="btn" id="btnSave">오늘 기록 저장</button>
             <button class="btn secondary" id="btnResetToday">오늘 기록 초기화</button>
         </div>
-        <div class="note">※ 가중치(kg)는 프로젝트 예시치입니다. 학교/팀 기준에 맞게 조정하세요.</div>
+        <div class="note">※ 탄소 절감량(kg)은 학교 캠페인용 예측치로, 실제 전력원, 장비 효율, 거리 등에 따라 다를 수 있습니다.</div>
         <div class="success" id="msg"></div>
         
         <div id="past-records-container">
@@ -233,7 +276,7 @@
     
     <script>
     // --- ⚙️ 캠페인 설정 ---
-    const CAMPAIGN_DATES = ['2025-10-13', '2025-10-14', '2025-10-15', '2025-10-16'];
+    const CAMPAIGN_DATES = ['2025-10-17', '2025-10-18', '2025-10-19', '2025-10-20'];
     const DB_KEY = 'greenSailData';
     // --- ⚙️ 설정 끝 ---
 
@@ -363,14 +406,29 @@
 
     // 저장 버튼
     btnSave.addEventListener('click', () => {
-        const grade = gradeInput.value;
-        const cls = classInput.value;
-        const num = numberInput.value;
+    const grade = parseInt(gradeInput.value); // 숫자로 변환
+    const cls = parseInt(classInput.value);   // 숫자로 변환
+    const num = parseInt(numberInput.value);   // 숫자로 변환
 
-        if (!grade || !cls || !num) {
-            alert('학년, 반, 학번을 모두 입력해주세요.');
-            return;
-        }
+        // ✅ --- 입력값 유효성 검사 시작 ---
+    if (!grade || !cls || !num) {
+        alert('학년, 반, 학번을 모두 입력해주세요.');
+        return;
+    }
+    if (grade < 1 || grade > 2) {
+        alert('학년은 1 또는 2만 입력 가능합니다.');
+        return;
+    }
+    if (cls < 1 || cls > 13) {
+        alert('반은 1부터 13까지만 입력 가능합니다.');
+        return;
+    }
+    if (num < 1 || num > 40) {
+        alert('학번은 1부터 40까지만 입력 가능합니다.');
+        return;
+    }
+    // --- ✅ 유효성 검사 끝 ---
+
 
         const studentId = `${grade}-${cls}-${num}`;
         const studentClass = `${grade}-${cls}`;
