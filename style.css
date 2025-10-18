@@ -1,13 +1,13 @@
 /* ✅ 공통 폰트 */
 @font-face {
     font-family: 'NanumSquare';
-    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2107@1.1/NanumSquare-Regular.woff') format('woff');
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_11-01@1.0/NanumSquare-Regular.woff') format('woff');
     font-weight: 400; /* 보통 */
     font-style: normal;
 }
 @font-face {
     font-family: 'NanumSquare';
-    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2107@1.1/NanumSquare-Bold.woff') format('woff');
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_11-01@1.0/NanumSquare-Bold.woff') format('woff');
     font-weight: 700; /* 굵게 */
     font-style: normal;
 }

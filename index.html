@@ -87,7 +87,10 @@
 
   <div class="footer"></div>
 
-<script>
+<script type="module">
+    // --- Import Firebase functions ---
+    import { getRecordsByRangeAndClass } from './app-firebase.js';
+
     // 페이드인/아웃 (기존과 동일)
     const io = new IntersectionObserver((entries)=>{
         entries.forEach(entry=>{
@@ -180,32 +183,32 @@
     });
 
        // Eco HUD
-    (function(){
+    (async function (){
     const hud = document.getElementById('ecoHud');
     const co2Num = document.getElementById('co2Num');
     const ring = document.getElementById('ringProg');
     const ringTxt = document.getElementById('ringTxt');
     const tipBox = document.getElementById('tipBox');
 
-     // ✅ --- 여기가 핵심: 총합을 직접 계산하는 로직 ---
+     /* ✅ --- 여기가 핵심: 총합을 직접 계산하는 로직 ---
     const DB_KEY = 'greenSailData';
-    const allData = JSON.parse(localStorage.getItem(DB_KEY) || '{}');
+    const allData = JSON.parse(localStorage.getItem(DB_KEY) || '{}'); */
     let totalSaved = 0;
 
-    // 모든 날짜를 순회
-    for (const date in allData) {
-        // 해당 날짜의 모든 학생 기록을 순회
-        for (const studentId in allData[date]) {
-            // 각 학생의 totalKg 값을 더함
-            totalSaved += allData[date][studentId].totalKg || 0;
+    try {
+            // ✅ Firebase에서 모든 기록 가져오기 (날짜 제한 없음)
+            const allRecords = await getRecordsByRangeAndClass({}); 
+            // ✅ 가져온 모든 기록의 totalKg 합산
+            allRecords.forEach(record => {
+                totalSaved += record.totalKg || 0;
+            });
+        } catch (error) {
+            console.error("Error fetching records for HUD:", error);
+            co2Num.textContent = "Error"; // 에러 표시
         }
-    }
-    const saved = totalSaved; // 계산된 총합을 'saved' 변수에 저장
-    // --- 계산 로직 끝 ---
-
-    
-    // ✅ 4일간의 총 목표량으로 설정 (예: 1500kg)
-    const GOAL = 1500;
+        
+        const saved = totalSaved;
+        const GOAL = 1500; // 4일간의 총 목표량
 
     // 숫자 애니메이션 (기존과 동일)
     function animateValue(el, start, end, dur){

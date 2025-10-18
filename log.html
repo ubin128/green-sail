@@ -206,50 +206,50 @@
             </div>
             <div class="card">
                 <div class="item">
-                    <input id="c_food" type="checkbox" data-kg="0.12">
-                    <label for="c_food">잔반 줄이기</label>
+                    <input id="c_food_waste" type="checkbox" data-kg="0.12">
+                    <label for="c_food_waste">잔반 줄이기</label>
                 </div>
                 <small>급식 잔반 감소량 기준 (≈ 0.12 kg)</small>
             </div>
             <div class="card">
                 <div class="item">
-                    <input id="c_food" type="checkbox" data-kg="0.12">
-                    <label for="c_food">양치, 세면 시 물 잠그기</label>
+                    <input id="c_water_off" type="checkbox" data-kg="0.12">
+                    <label for="c_water_off">양치, 세면 시 물 잠그기</label>
                 </div>
                 <small>양치컵 사용, 물 틀어두지 않기 (≈ 0.02 kg)</small>
             </div>
             <div class="card">
                 <div class="item">
-                    <input id="c_food" type="checkbox" data-kg="0.12">
-                    <label for="c_food">플라스틱, 캔, 종이 분리배출</label>
+                    <input id="c_recycle" type="checkbox" data-kg="0.12">
+                    <label for="c_recycle">플라스틱, 캔, 종이 분리배출</label>
                 </div>
-                <small>분비배출 1회 실천 기준 (≈ 0.04 kg)</small>
+                <small>분리배출 1회 실천 기준 (≈ 0.04 kg)</small>
             </div>
             <div class="card">
                 <div class="item">
-                    <input id="c_food" type="checkbox" data-kg="0.12">
-                    <label for="c_food">페트병 라벨 제거</label>
+                    <input id="c_label_off" type="checkbox" data-kg="0.12">
+                    <label for="c_label_off">페트병 라벨 제거</label>
                 </div>
                 <small>(≈ 0.01 kg) // 재활용률 향상 !</small>
             </div>
             <div class="card">
                 <div class="item">
-                    <input id="c_food" type="checkbox" data-kg="0.12">
-                    <label for="c_food">실내 식물 가꾸기</label>
+                    <input id="c_plant" type="checkbox" data-kg="0.12">
+                    <label for="c_plant">실내 식물 가꾸기</label>
                 </div>
                 <small>공기 정화 및 미세먼지 감소 (≈ 0.02 kg)</small>
             </div>
             <div class="card">
                 <div class="item">
-                    <input id="c_food" type="checkbox" data-kg="0.12">
-                    <label for="c_food">친환경 제품 사용</label>
+                    <input id="c_eco_product" type="checkbox" data-kg="0.12">
+                    <label for="c_eco_product">친환경 제품 사용</label>
                 </div>
                 <small>ex. LED 조명, 친환경 세제, 지속 가능한 제품 (≈ 0.10 kg)</small>
             </div>
             <div class="card">
                 <div class="item">
-                    <input id="c_food" type="checkbox" data-kg="0.12">
-                    <label for="c_food">필요 없는 소비 줄이기 / 중고 물품 사용</label>
+                    <input id="c_secondhand" type="checkbox" data-kg="0.12">
+                    <label for="c_secondhand">필요 없는 소비 줄이기 / 중고 물품 사용</label>
                 </div>
                 <small>제조 및 운송 과정에서 발생할 탄소 배출 예방 (≈ 0.7 kg)</small>
             </div>
@@ -272,14 +272,28 @@
 
         </div>
 
-       
+       <!-- ① 날짜를 항상 먼저 찍는 '일반' 스크립트 -->
+      <script>
+      (function () {
+      const el = document.getElementById('todayStr');
+      if (!el) return;
+      const now = new Date();
+      const y = now.getFullYear();
+      const m = String(now.getMonth() + 1).padStart(2, '0');
+      const d = String(now.getDate()).padStart(2, '0');
+      el.textContent = `${y}년 ${m}월 ${d}일 (${['일','월','화','수','목','금','토'][now.getDay()]})`;
+      })();
+      </script>
     
-    <script>
-    // --- ⚙️ 캠페인 설정 ---
-    const CAMPAIGN_DATES = ['2025-10-17', '2025-10-18', '2025-10-19', '2025-10-20'];
-    const DB_KEY = 'greenSailData';
+    <script type="module"> // ✅ type="module" 추가!
+    // --- Import Firebase functions ---
+    import { upsertStudentRecord, getStudentRecords, deleteStudentRecord } from './app-firebase.js';
+
+    // --- ⚙️ 설정 ---
+    const CAMPAIGN_DATES = ['2025-10-18', '2025-10-19', '2025-10-20', '2025-10-21']; // 실제 캠페인 날짜로 수정
     // --- ⚙️ 설정 끝 ---
 
+    // HTML 요소 (기존과 동일)
     const list = document.getElementById('list');
     const sumEl = document.getElementById('sumKg');
     const MSG = document.getElementById('msg');
@@ -290,19 +304,18 @@
     const container = document.querySelector('.container');
     const btnSave = document.getElementById('btnSave');
     const btnResetToday = document.getElementById('btnResetToday');
-    
+
     const now = new Date();
     const todayKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-    document.getElementById('todayStr').textContent = `${now.getFullYear()}년 ${String(now.getMonth() + 1).padStart(2, '0')}월 ${String(now.getDate()).padStart(2, '0')}일`;
+
+    // document.getElementById('todayStr').textContent = `${now.getFullYear()}년 ${String(now.getMonth() + 1).padStart(2, '0')}월 ${String(now.getDate()).padStart(2, '0')}일`;
 
 
-   /*  todayStrEl.textContent = `${y}년 ${m}월 ${d}일`; */
-
-    // 캠페인 기간인지 확인
+    // 캠페인 기간 확인 및 비활성화 (기존과 동일)
     const isCampaignPeriod = CAMPAIGN_DATES.includes(todayKey);
-
     if (!isCampaignPeriod) {
-        container.innerHTML += '<div style="background: #ffdddd; color: #d32f2f; padding: 20px; text-align: center; border-radius: 8px; margin-top: 20px; font-weight: bold;">캠페인 진행 기간(10/21 ~ 10/24)이 아닙니다.</div>';
+        // ... 비활성화 코드 ...
+           container.innerHTML += '<div style="background: #ffdddd; color: #d32f2f; padding: 20px; text-align: center; border-radius: 8px; margin-top: 20px; font-weight: bold;">캠페인 진행 기간(10/21 ~ 10/24)이 아닙니다.</div>';
         // 모든 입력 필드를 비활성화
         list.querySelectorAll('input').forEach(input => input.disabled = true);
         gradeInput.disabled = true;
@@ -312,15 +325,9 @@
         btnResetToday.disabled = true;
     }
 
-     // --- ✅ 확인 코드 끝 ---
-
-    // 전체 데이터 가져오기/저장하기
-    const getAllData = () => JSON.parse(localStorage.getItem(DB_KEY) || '{}');
-    const saveAllData = (data) => localStorage.setItem(DB_KEY, JSON.stringify(data));
-
-    // 학생 정보가 변경될 때마다 실행되는 메인 함수
-    function handleStudentInputChange() {
-        if (!isCampaignPeriod) return; // 캠페인 기간이 아니면 실행 중단
+    // 학생 정보 변경 시 메인 함수 (async 추가)
+    async function handleStudentInputChange() {
+        if (!isCampaignPeriod) return;
 
         const grade = gradeInput.value;
         const cls = classInput.value;
@@ -332,50 +339,55 @@
             calcSum();
             return;
         }
-        
+
         list.querySelectorAll('input').forEach(ch => ch.disabled = false);
         const studentId = `${grade}-${cls}-${num}`;
 
-        showStudentPastRecords(studentId);
-        loadStudentTodayRecord(studentId);
+        // ✅ Firebase에서 데이터 로드 (await 추가)
+        await showStudentPastRecords(studentId);
+        await loadStudentTodayRecord(studentId);
     }
 
-
-// ✨ '나의 지난 모든 기록'을 보여주는 함수
-    function showStudentPastRecords(studentId) {
-        const allData = getAllData();
+    // '나의 지난 모든 기록' 보여주기 (Firebase 사용, async 추가)
+    async function showStudentPastRecords(studentId) {
         let pastRecordsHTML = '';
+        const pastDates = CAMPAIGN_DATES.filter(date => date < todayKey);
 
-        CAMPAIGN_DATES.forEach(dateKey => {
-            if (dateKey < todayKey && allData[dateKey] && allData[dateKey][studentId]) {
-                const record = allData[dateKey][studentId];
+        if (pastDates.length > 0) {
+            // ✅ Firebase에서 해당 학생의 과거 기록들 가져오기
+            const records = await getStudentRecords(studentId, pastDates);
+
+            records.forEach(record => {
                 let checkedItemsHTML = '<ul>';
-                list.querySelectorAll('input[type="checkbox"]').forEach(ch => {
+                const allCheckboxes = Array.from(list.querySelectorAll('input[type="checkbox"]')); // 미리 가져오기
+                allCheckboxes.forEach(ch => {
                     if (record.checks.includes(ch.id)) {
-                        const label = document.querySelector(`label[for="${ch.id}"]`).textContent;
+                        const label = document.querySelector(`label[for="${ch.id}"]`)?.textContent || ch.id;
                         checkedItemsHTML += `<li>${label}</li>`;
                     }
                 });
                 checkedItemsHTML += '</ul>';
-                
-                const dateParts = dateKey.split('-');
+
+                const dateParts = record.date.split('-');
                 pastRecordsHTML += `
                     <div class="summary-box">
                         <h2>${dateParts[1]}/${dateParts[2]} 기록</h2>
-                        ${checkedItemsHTML}
+                        ${record.checks.length > 0 ? checkedItemsHTML : '<p style="color: var(--muted);">체크한 항목 없음</p>'}
                         <div class="summary-total">총 ${record.totalKg.toFixed(2)} kg CO₂ 절감</div>
                     </div>
                 `;
-            }
-        });
+            });
+        }
         pastRecordsContainer.innerHTML = pastRecordsHTML || '<div class="summary-box"><p style="color: var(--muted);">아직 지난 기록이 없습니다.</p></div>';
     }
 
-    // '나의 오늘 기록'을 불러와 체크박스에 복원하는 함수
-    function loadStudentTodayRecord(studentId) {
-        const allData = getAllData();
-        if (allData[todayKey] && allData[todayKey][studentId]) {
-            const savedChecks = allData[todayKey][studentId].checks;
+    // '나의 오늘 기록' 불러오기 (Firebase 사용, async 추가)
+    async function loadStudentTodayRecord(studentId) {
+        // ✅ Firebase에서 해당 학생의 '오늘' 기록 가져오기
+        const todayRecord = await getStudentRecords(studentId, [todayKey]);
+
+        if (todayRecord.length > 0) {
+            const savedChecks = todayRecord[0].checks;
             list.querySelectorAll('input[type="checkbox"]').forEach(ch => {
                 ch.checked = savedChecks.includes(ch.id);
             });
@@ -387,14 +399,8 @@
         }
         calcSum();
     }
-    
-    // 이벤트 리스너 연결
-    gradeInput.addEventListener('input', handleStudentInputChange);
-    classInput.addEventListener('input', handleStudentInputChange);
-    numberInput.addEventListener('input', handleStudentInputChange);
-    list.addEventListener('change', calcSum);
 
-    // 합계 계산 함수
+    // 합계 계산 함수 (변경 없음)
     function calcSum() {
         let sum = 0;
         list.querySelectorAll('input[type="checkbox"]:checked').forEach(ch => {
@@ -403,32 +409,19 @@
         sumEl.textContent = sum.toFixed(2);
         return sum;
     }
+    list.addEventListener('change', calcSum); // 이벤트 리스너 추가
 
-    // 저장 버튼
-    btnSave.addEventListener('click', () => {
-    const grade = parseInt(gradeInput.value); // 숫자로 변환
-    const cls = parseInt(classInput.value);   // 숫자로 변환
-    const num = parseInt(numberInput.value);   // 숫자로 변환
+    // 저장 버튼 (Firebase 사용, async 추가)
+    btnSave.addEventListener('click', async () => {
+        const grade = parseInt(gradeInput.value);
+        const cls = parseInt(classInput.value);
+        const num = parseInt(numberInput.value);
 
-        // ✅ --- 입력값 유효성 검사 시작 ---
-    if (!grade || !cls || !num) {
-        alert('학년, 반, 학번을 모두 입력해주세요.');
-        return;
-    }
-    if (grade < 1 || grade > 2) {
-        alert('학년은 1 또는 2만 입력 가능합니다.');
-        return;
-    }
-    if (cls < 1 || cls > 13) {
-        alert('반은 1부터 13까지만 입력 가능합니다.');
-        return;
-    }
-    if (num < 1 || num > 40) {
-        alert('학번은 1부터 40까지만 입력 가능합니다.');
-        return;
-    }
-    // --- ✅ 유효성 검사 끝 ---
-
+        // 유효성 검사 (기존과 동일)
+        if (!(grade >= 1 && grade <= 2 && cls >= 1 && cls <= 13 && num >= 1 && num <= 40)) {
+            alert('학년(1-2), 반(1-13), 학번(1-40)을 올바르게 입력해주세요.');
+            return;
+        }
 
         const studentId = `${grade}-${cls}-${num}`;
         const studentClass = `${grade}-${cls}`;
@@ -436,26 +429,23 @@
         const checkedIds = Array.from(list.querySelectorAll('input[type="checkbox"]:checked')).map(ch => ch.id);
 
         const record = {
-            class: studentClass,
-            student: studentId,
-            date: todayKey,
-            checks: checkedIds,
-            totalKg: todaySum,
+            class: studentClass, student: studentId, date: todayKey,
+            checks: checkedIds, totalKg: todaySum,
         };
 
-        const allData = getAllData();
-        if (!allData[todayKey]) {
-            allData[todayKey] = {};
+        try {
+            MSG.textContent = '💾 저장 중...';
+            MSG.classList.add('show');
+            await upsertStudentRecord(record); // ✅ Firebase에 저장
+            MSG.textContent = `✅ 저장되었습니다! 오늘 나의 기록: ${todaySum.toFixed(2)} kg CO₂`;
+        } catch (error) {
+             MSG.textContent = `❌ 저장 실패: ${error.message}`;
+             console.error(error);
         }
-        allData[todayKey][studentId] = record;
-        saveAllData(allData);
-
-        MSG.classList.add('show');
-        MSG.textContent = `✅ 저장되었습니다! 오늘 나의 기록: ${todaySum.toFixed(2)} kg CO₂`;
     });
-    
-    // 초기화 버튼
-    btnResetToday.addEventListener('click', () => {
+
+    // 초기화 버튼 (Firebase 사용, async 추가)
+    btnResetToday.addEventListener('click', async () => {
         const grade = gradeInput.value;
         const cls = classInput.value;
         const num = numberInput.value;
@@ -465,21 +455,30 @@
             return;
         }
         const studentId = `${grade}-${cls}-${num}`;
-        const allData = getAllData();
 
-        if (allData[todayKey] && allData[todayKey][studentId]) {
-            delete allData[todayKey][studentId];
-            saveAllData(allData);
-            list.querySelectorAll('input').forEach(ch => ch.checked = false);
-            calcSum();
+        try {
+            MSG.textContent = '🗑️ 삭제 중...';
             MSG.classList.add('show');
-            MSG.textContent = '♻️ 오늘 나의 기록을 초기화했습니다.';
-        } else {
-            alert('저장된 기록이 없습니다.');
+            const deleted = await deleteStudentRecord(todayKey, studentId); // ✅ Firebase에서 삭제
+            if (deleted) {
+                list.querySelectorAll('input').forEach(ch => ch.checked = false);
+                calcSum();
+                MSG.textContent = '♻️ 오늘 나의 기록을 초기화했습니다.';
+            } else {
+                 MSG.textContent = 'ℹ️ 삭제할 기록이 없습니다.';
+            }
+        } catch(error) {
+             MSG.textContent = `❌ 초기화 실패: ${error.message}`;
+             console.error(error);
         }
     });
 
-    // 페이지 첫 로드 시 실행
+    // 이벤트 리스너 연결 (기존과 동일)
+    gradeInput.addEventListener('input', handleStudentInputChange);
+    classInput.addEventListener('input', handleStudentInputChange);
+    numberInput.addEventListener('input', handleStudentInputChange);
+
+    // 페이지 첫 로드 시 실행 (기존과 동일)
     handleStudentInputChange();
 </script>
 </body>
