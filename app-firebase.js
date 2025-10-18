@@ -141,7 +141,7 @@ export async function getRecordsByRangeAndClass(opts = {}) {
 /* ===========================
     5) 삭제 유틸 ✨ Modified
 =========================== */
-/* 전체 학생 기록 삭제
+/*전체 학생 기록 삭제
 export async function deleteAllRecords() {
     try {
         const snap = await getDocs(collection(db, STUDENT_RECORDS_COLLECTION));
