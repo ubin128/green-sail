@@ -388,7 +388,7 @@
             await loadStudentTodayRecord(currentStudentId);
             
             list.querySelectorAll('input').forEach(ch => ch.disabled = false);
-            //[gradeInput, classInput, numberInput, btnConfirmStudent].forEach(el => el.disabled = true);
+            [gradeInput, classInput, numberInput, btnConfirmStudent].forEach(el => el.disabled = true);
         } catch (error) {
             console.error("데이터 로드 오류:", error);
             MSG.textContent = '❌ 기록 로딩 중 오류가 발생했습니다.';
