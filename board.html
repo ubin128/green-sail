@@ -171,8 +171,6 @@
   <button id="btnAll" type="button">전체</button>
 </span>
 
-
-        <input id="filterClass" placeholder="반 (예: 1-3, 2-1 / 비우면 전체)" />
         <button id="btnApplyMode" type="button">이 모드로 적용</button>
       </div>
 
@@ -218,20 +216,20 @@
   <a href="https://ubin128.github.io/green-sail/" class="floating-home-btn" title="홈으로 가기">홈</a>
 
   <script type="module">
-    // 🔗 Firestore 조회 함수만 사용
+    // 🔗 Firestore 조회 함수만 사용 (리스너 바깥에 위치)
     import { getRecordsByRangeAndClass } from './app-firebase.js';
 
-    /* ========== 공용 유틸 & 로그 ========== */
-    const todayStr = () => new Date().toISOString().slice(0,10);
-    const log = (...a)=>{
-      const e=document.getElementById('log');
-      if (e) e.textContent=a.map(x=>typeof x==='object'?JSON.stringify(x,null,2):String(x)).join('\n');
-      console.log(...a);
-    };
+    // ✅ DOM 로딩 완료 후 스크립트 실행 시작
+    document.addEventListener('DOMContentLoaded', () => {
 
-    /* ========== 값 라벨 플러그인(툴팁 겹침 방지) ========== */
-    const valueLabelPlugin = {
-      id: 'valueLabel',
+        /* ========== 공용 유틸 & 로그 ========== */
+        const todayStr = () => new Date().toISOString().slice(0,10);
+        const log = (...a)=>{  const e=document.getElementById('log');
+      if (e) e.textContent=a.map(x=>typeof x==='object'?JSON.stringify(x,null,2):String(x)).join('\n');
+      console.log(...a); }; // (기존 코드)
+
+        /* ========== 값 라벨 플러그인 ========== */
+        const valueLabelPlugin = { id: 'valueLabel',
       afterDatasetsDraw(chart) {
         const { ctx, scales } = chart;
         const ds = chart.data.datasets[0];
@@ -250,35 +248,29 @@
           ctx.fillText(String(v), x, y);
         });
         ctx.restore();
-      }
-    };
-    Chart.register(valueLabelPlugin);
+      } }; // (기존 코드)
+        Chart.register(valueLabelPlugin);
 
-    /* ========== 차트 2개 초기화 ========== */
-    const chart1 = new Chart(document.getElementById('chart1').getContext('2d'), {
-      type:'bar',
+        /* ========== 차트 2개 초기화 ========== */
+        const chart1 = new Chart(document.getElementById('chart1').getContext('2d'), { type:'bar',
       data:{ labels:[], datasets:[{ label:'1학년 합계', data:[], borderWidth:2 }]},
       options:{
         responsive:true,
         layout:{ padding:{ top:24 }},
         plugins:{ legend:{ display:false }, title:{ display:true, text:'1학년 반별 합계' }},
         scales:{ y:{ beginAtZero:true, ticks:{ stepSize:1 }}}
-      }
-    });
-    const chart2 = new Chart(document.getElementById('chart2').getContext('2d'), {
-      type:'bar',
+      } }); // (기존 코드)
+        const chart2 = new Chart(document.getElementById('chart2').getContext('2d'), { type:'bar',
       data:{ labels:[], datasets:[{ label:'2학년 합계', data:[], borderWidth:2 }]},
       options:{
         responsive:true,
         layout:{ padding:{ top:24 }},
         plugins:{ legend:{ display:false }, title:{ display:true, text:'2학년 반별 합계' }},
         scales:{ y:{ beginAtZero:true, ticks:{ stepSize:1 }}}
-      }
-    });
+      } }); // (기존 코드)
 
-    /* ========== Top3 강조 + 차트 갱신 ========== */
-    function paintTop3(chart, labels, values){
-      const s = values.map(v=>Number(v)||0);
+        /* ========== Top3 강조 + 차트 갱신 ========== */
+        function paintTop3(chart, labels, values){ const s = values.map(v=>Number(v)||0);
       const order = s.map((v,i)=>({v,i})).sort((a,b)=>b.v-a.v);
       const top = order.slice(0,3).map(x=>x.i);
       const bg = s.map((v,i)=> i===top[0] ? 'rgba(255,205,86,0.7)'
@@ -293,27 +285,23 @@
       chart.data.datasets[0].data = s;
       chart.data.datasets[0].backgroundColor = bg;
       chart.data.datasets[0].borderColor = bd;
-      chart.update();
-    }
+      chart.update(); } // (기존 코드)
 
-    /* ========== 반별 합산 (totalKg 있으면 사용, 없으면 튜플 합계) ========== */
-    function groupByClass(records){
-      const by = {};
+        /* ========== 반별 합산 ========== */
+        function groupByClass(records){ const by = {};
       for (const r of records){
         const c = r.class || '미지정';
-        const fallback = (r.tumbler||0)+(r.lightOff||0)+(r.zeroWaste||0);
-        const val = r.totalKg!=null ? Number(r.totalKg) : fallback; // ← 안전한 합산
+       // const fallback = (r.tumbler||0)+(r.lightOff||0)+(r.zeroWaste||0);
+        const val = r.totalKg!=null ? Number(r.totalKg) : 0; // ← 안전한 합산
         by[c] = (by[c] || 0) + val;
       }
       const sorted = Object.entries(by).sort((a,b)=>b[1]-a[1]);
       // 소수 2자리 반올림 (표시 깔끔)
       const entries = sorted.map(([cls,total]) => [cls, Number(total.toFixed(2))]);
-      return { labels: entries.map(x=>x[0]), values: entries.map(x=>x[1]), entries };
-    }
+      return { labels: entries.map(x=>x[0]), values: entries.map(x=>x[1]), entries }; } // (기존 코드)
 
-    /* ========== 1·2학년 분리 렌더 ========== */
-    function renderSeparated(records){
-      const first  = records.filter(r => (r.class||'').startsWith('1-'));
+        /* ========== 1·2학년 분리 렌더 ========== */
+        function renderSeparated(records){  const first  = records.filter(r => (r.class||'').startsWith('1-'));
       const second = records.filter(r => (r.class||'').startsWith('2-'));
       const g1 = groupByClass(first);
       const g2 = groupByClass(second);
@@ -329,13 +317,11 @@
             }).join('');
       };
       drawRank('#rank1 tbody', g1.entries);
-      drawRank('#rank2 tbody', g2.entries);
-    }
+      drawRank('#rank2 tbody', g2.entries); } // (기존 코드)
 
-    /* ========== 보기 모드 UI / 적용 로직 분리 ========== */
-    const getViewMode = () => document.getElementById('modeDaily').checked ? 'daily' : 'cumulative';
-    function updateFilterUI(){
-      const daily  = document.getElementById('dailyInputs');
+        /* ========== 보기 모드 UI / 적용 로직 분리 ========== */
+        const getViewMode = () => document.getElementById('modeDaily').checked ? 'daily' : 'cumulative';
+        function updateFilterUI(){ const daily  = document.getElementById('dailyInputs');
       const quick  = document.getElementById('quickRange');
       if (getViewMode()==='daily'){
         daily.style.display = 'inline-flex';
@@ -343,14 +329,12 @@
       }else{
         daily.style.display = 'none';
         quick.style.display = 'inline-flex';
-      }
-    }
+      } } // (기존 코드)
 
-    // 마지막 적용 기준(자동 새로고침용)
-    let lastCriteria = { start: undefined, end: undefined, cls: 'ALL' };
+        // 마지막 적용 기준(자동 새로고침용)
+        let lastCriteria = { start: undefined, end: undefined, cls: 'ALL' };
 
-    async function applyWith({ start, end, cls }){
-      try{
+        async function applyWith({ start, end, cls }){  try{
         const records = await getRecordsByRangeAndClass({ startDate:start, endDate:end, cls });
         log('🔎 적용 기준:', { start, end, cls, count: records.length });
         renderSeparated(records);
@@ -358,78 +342,59 @@
       }catch(e){
         console.error(e);
         alert('필터 적용 실패: ' + (e.code || e.message));
-      }
-    }
+      } } // (기존 코드)
 
-    // A. 보기 모드 제어
-    document.getElementById('modeDaily').addEventListener('change', updateFilterUI);
-    document.getElementById('modeCumulative').addEventListener('change', updateFilterUI);
-
-    document.getElementById('btnToday').onclick = () => {
-      document.getElementById('modeDaily').checked = true;
+        // A. 보기 모드 제어
+        // ✅ 모든 이벤트 리스너가 DOMContentLoaded 안에 위치
+        document.getElementById('modeDaily').addEventListener('change', updateFilterUI);
+        document.getElementById('modeCumulative').addEventListener('change', updateFilterUI);
+        
+        document.getElementById('btnToday').onclick = () => {  document.getElementById('modeDaily').checked = true;
       updateFilterUI();
-      document.getElementById('viewDate').value = todayStr();
-    };
+      document.getElementById('viewDate').value = todayStr(); }; // (기존 코드)
+        
+        // ⚠️ '이번 주', '이번 달' 버튼이 HTML에 없으므로 관련 JS 코드도 삭제합니다.
+        // document.getElementById('btnThisWeek').onclick = ...; // 삭제
+        // document.getElementById('btnThisMonth').onclick = ...; // 삭제
 
-    document.getElementById('btnThisWeek').onclick = () => {
-      document.getElementById('modeCumulative').checked = true;
-      updateFilterUI();
-      const n=new Date(), m=new Date(n);
-      m.setDate(n.getDate()-(n.getDay()+6)%7);
-      const s = m.toISOString().slice(0,10);
-      const e = new Date(m.getFullYear(), m.getMonth(), m.getDate()+6).toISOString().slice(0,10);
-      // dataset에 보관
-      document.getElementById('modeCumulative').dataset.quickStart = s;
-      document.getElementById('modeCumulative').dataset.quickEnd   = e;
-    };
-
-    document.getElementById('btnThisMonth').onclick = () => {
-      document.getElementById('modeCumulative').checked = true;
-      updateFilterUI();
-      const n=new Date();
-      const s=new Date(n.getFullYear(), n.getMonth(), 1).toISOString().slice(0,10);
-      const e=new Date(n.getFullYear(), n.getMonth()+1, 0).toISOString().slice(0,10);
-      document.getElementById('modeCumulative').dataset.quickStart = s;
-      document.getElementById('modeCumulative').dataset.quickEnd   = e;
-    };
-
-    document.getElementById('btnAll').onclick = () => {
-      document.getElementById('modeCumulative').checked = true;
+        document.getElementById('btnAll').onclick = () => { document.getElementById('modeCumulative').checked = true;
       updateFilterUI();
       delete document.getElementById('modeCumulative').dataset.quickStart;
-      delete document.getElementById('modeCumulative').dataset.quickEnd;
-    };
+      delete document.getElementById('modeCumulative').dataset.quickEnd; }; // (기존 코드)
+        
+        document.getElementById('btnApplyMode').onclick = () => { //✅ [수정] 'filterClass' 입력창을 읽는 대신, 항상 'ALL'로 설정
+            const cls = 'ALL';
+            
+            if (getViewMode()==='daily'){
+                const day = document.getElementById('viewDate').value || todayStr();
+                applyWith({ start: day, end: day, cls });
+            } else {
+                const s = document.getElementById('modeCumulative').dataset.quickStart;
+                const e = document.getElementById('modeCumulative').dataset.quickEnd;
+                applyWith({ start: s, end: e, cls });
+            } }; // (기존 코드)
 
-    document.getElementById('btnApplyMode').onclick = () => {
-      const cls = (document.getElementById('filterClass').value || '').trim() || 'ALL';
-      if (getViewMode()==='daily'){
-        const day = document.getElementById('viewDate').value || todayStr();
-        applyWith({ start: day, end: day, cls });
-      } else {
-        const s = document.getElementById('modeCumulative').dataset.quickStart;
-        const e = document.getElementById('modeCumulative').dataset.quickEnd;
-        applyWith({ start: s, end: e, cls });
-      }
-    };
+        // B. 직접 기간 지정
+        document.getElementById('btnApplyCustom').onclick = () => { const s = document.getElementById('startCustom').value || undefined;
+            const e = document.getElementById('endCustom').value   || undefined;
+            // ✅ [수정] 'filterClass' 입력창을 읽는 대신, 항상 'ALL'로 설정
+            const cls = 'ALL';
+            applyWith({ start: s, end: e, cls }); }; // (기존 코드)
+        
+        // ⚠️ '데이터 입력' 및 '데이터 관리' 섹션이 HTML에 없으므로 관련 JS 코드를 삭제합니다.
+        // document.getElementById('addTest').onclick = ...; // 삭제
+        // document.getElementById('addReal').onclick = ...; // 삭제
+        // document.getElementById('deleteAll').onclick = ...; // 삭제
+        // document.getElementById('deleteByClass').onclick = ...; // 삭제
 
-    // B. 직접 기간 지정
-    document.getElementById('btnApplyCustom').onclick = () => {
-      const s = document.getElementById('startCustom').value || undefined;
-      const e = document.getElementById('endCustom').value   || undefined;
-      const cls = (document.getElementById('filterClass').value || '').trim() || 'ALL';
-      applyWith({ start: s, end: e, cls });
-    };
-    document.getElementById('btnClearCustom').onclick = () => {
-      document.getElementById('startCustom').value = '';
-      document.getElementById('endCustom').value   = '';
-    };
+        // 자동 새로고침: 마지막 기준 그대로
+        const intervalId = setInterval(() => applyWith(lastCriteria), 15000);
+        window.addEventListener('beforeunload', () => { clearInterval(intervalId); });
 
-    // 자동 새로고침: 마지막 기준 그대로
-    setInterval(() => applyWith(lastCriteria), 15000);
-
-    // 초기화
-    updateFilterUI();
-    applyWith({ start: undefined, end: undefined, cls: 'ALL' });
-  </script>
+        // 초기화
+        updateFilterUI();
+        applyWith({ start: undefined, end: undefined, cls: 'ALL' });
+    }); // ✅ DOMContentLoaded 리스너 닫는 괄호
+</script>
 </body>
 </html>
