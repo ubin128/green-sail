@@ -319,6 +319,7 @@
     const btnSave = document.getElementById('btnSave');
     const btnResetToday = document.getElementById('btnResetToday');
     const btnConfirmStudent = document.getElementById('btnConfirmStudent'); // ✅ '확인' 버튼 요소 추가
+    const dateBox = container.querySelector('.datebox');
 
     const now = new Date();
     const todayKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
@@ -331,8 +332,15 @@
     // 캠페인 기간 확인 및 비활성화 (기존과 동일)
     const isCampaignPeriod = CAMPAIGN_DATES.includes(todayKey);
     if (!isCampaignPeriod) {
-        // ... 비활성화 코드 ...
+        // ✅ [수정] p.sub 바로 뒤에 메시지를 삽입합니다.
+        if (dateBox) {
+            dateBox.insertAdjacentHTML('afterend', '<div style="background: #ffdddd; color: #d32f2f; padding: 20px; text-align: center; border-radius: 8px; margin: 24px 0; font-weight: bold;">캠페인 진행 기간(' + CAMPAIGN_DATES[0].substring(5) + ' ~ ' + CAMPAIGN_DATES[CAMPAIGN_DATES.length - 1].substring(5) + ')이 아닙니다.</div>');
+        } else {
+            // 혹시 p.sub를 못찾으면 맨 뒤에라도 추가 (안전장치)
            container.innerHTML += '<div style="background: #ffdddd; color: #d32f2f; padding: 20px; text-align: center; border-radius: 8px; margin-top: 20px; font-weight: bold;">캠페인 진행 기간(10/21 ~ 10/24)이 아닙니다.</div>';
+        }
+        // ... 비활성화 코드 ...
+        
         // 모든 입력 필드를 비활성화
         list.querySelectorAll('input').forEach(input => input.disabled = true);
         gradeInput.disabled = true;
