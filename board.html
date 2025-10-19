@@ -73,15 +73,10 @@
     .actions button:hover{ transform: translateY(-1px); }
     .actions button:active{ transform: translateY(0); }
 
-    #chart1, #chart2 {
-    background: #fff;
-    border-radius: 14px;
-    padding: 8px;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.06);
-    /* ✅ 차트가 부모 너비를 넘지 않도록 최대 너비 설정 */
-    max-width: 100%; 
-    height: auto; /* ✅ 높이는 비율에 맞게 자동 조절 */
-    display: block; /* ✅ 혹시 모를 inline 속성 제거 */
+    #chart1, #chart2{
+      background:#fff; border-radius:14px; padding:8px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+      max-width:100%; height:auto; display:block;
     }
 
     table{ width:100%; margin-top:12px; border-collapse:collapse; background:#fff; border-radius:12px; overflow:hidden; }
@@ -118,37 +113,32 @@
     }
     .section h2::before { content: "🔹"; font-size: 16px; }
 
-    .grades{
-      display:grid; gap:16px; grid-template-columns: 1fr; 
-    }
-    @media (min-width: 980px){
-      .grades{ grid-template-columns: 1fr 1fr; }
-    }
+    .grades{ display:grid; gap:16px; grid-template-columns: 1fr; }
+    @media (min-width: 980px){ .grades{ grid-template-columns: 1fr 1fr; } }
 
     /* 🌊 오른쪽 아래에 고정되는 홈 버튼 */
-.floating-home-btn {
-  position: fixed;
-  bottom: 24px;
-  right: 24px;
-  width: 52px;
-  height: 52px;
-  background: #3b82f6;
-  color: #fff;
-  font-size: 26px;
-  text-align: center;
-  line-height: 52px;
-  border-radius: 50%;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.25);
-  text-decoration: none;
-  transition: all 0.2s ease;
-  z-index: 999;
-}
-.floating-home-btn:hover {
-  background: #2563eb;
-  transform: translateY(-2px) scale(1.05);
-  box-shadow: 0 6px 20px rgba(0,0,0,0.3);
-}
-
+    .floating-home-btn {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      width: 52px;
+      height: 52px;
+      background: #3b82f6;
+      color: #fff;
+      font-size: 26px;
+      text-align: center;
+      line-height: 52px;
+      border-radius: 50%;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+      text-decoration: none;
+      transition: all 0.2s ease;
+      z-index: 999;
+    }
+    .floating-home-btn:hover {
+      background: #2563eb;
+      transform: translateY(-2px) scale(1.05);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+    }
   </style>
 </head>
 
@@ -158,15 +148,15 @@
   </header>
 
   <div class="board">
-    <h1>
-  반별 현황판 📊
-</h1>
+    <h1>반별 현황판 📊</h1>
 
     <!-- 🔍 데이터 필터 구역 -->
     <div class="section">
       <h2>데이터 필터</h2>
-      <div class="actions" id="filterBar" style="gap:8px; flex-wrap:wrap; align-items:center">
-        <strong style="margin-right:4px;">보기:</strong>
+
+      <!-- ✅ A. 보기 모드 (하루/누적) -->
+      <div class="actions" id="modeBar" style="gap:8px; flex-wrap:wrap; align-items:center">
+        <strong style="margin-right:4px;">보기 모드:</strong>
         <label><input type="radio" name="mode" value="cumulative" id="modeCumulative" checked> 누적</label>
         <label><input type="radio" name="mode" value="daily" id="modeDaily"> 하루</label>
 
@@ -176,33 +166,26 @@
           <button id="btnToday" type="button">오늘</button>
         </span>
 
-        <!-- 누적(기간) 보기 전용 -->
-        <span id="rangeInputs" style="display:inline-flex; gap:8px; align-items:center">
-          <label>시작 <input id="filterStart" type="date" /></label>
-          <label>끝 <input id="filterEnd" type="date" /></label>
+        <!-- 누적(빠른 기간) 전용 -->
+        <span id="quickRange" style="display:inline-flex; gap:8px; align-items:center">
+          <button id="btnThisWeek"  type="button">이번 주</button>
+          <button id="btnThisMonth" type="button">이번 달</button>
+          <button id="btnAll"       type="button">전체</button>
         </span>
 
         <input id="filterClass" placeholder="반 (예: 1-3, 2-1 / 비우면 전체)" />
+        <button id="btnApplyMode" type="button">이 모드로 적용</button>
+      </div>
 
-        <!-- 누적 모드에서 쓰는 빠른 버튼들 -->
-        <button id="btnClear" type="button">전체</button>
-        <button id="btnApply" type="button">필터 적용</button>
+      <!-- ✅ B. 직접 기간 지정 (A와 완전 별개) -->
+      <div class="actions" id="customBar" style="gap:8px; flex-wrap:wrap; align-items:center; margin-top:8px;">
+        <strong style="margin-right:4px;">기간 선택:</strong>
+        <label>시작 <input id="startCustom" type="date" /></label>
+        <label>끝   <input id="endCustom"   type="date" /></label>
+        <button id="btnApplyCustom" type="button">선택한 기간으로 적용</button>
+        <button id="btnClearCustom" type="button">지우기</button>
       </div>
     </div>
-
-    <!--               📝 데이터 입력 
-    <div class="section">
-      <h2>데이터 입력</h2>
-      <div class="actions">
-        <input id="cls" placeholder="반 (예: 1-1 또는 2-1)" />
-        <input id="date" type="date" />
-        <input id="tumbler" type="number" min="0" placeholder="텀블러" />
-        <input id="lightOff" type="number" min="0" placeholder="소등" />
-        <input id="zeroWaste" type="number" min="0" placeholder="제로웨이스트" />
-        <button id="addReal" type="button">추가</button>
-      </div>
-    </div>                       -->
-
 
     <!-- 📊 1·2학년 차트 & 순위 (좌우 분리) -->
     <div class="grades">
@@ -229,84 +212,74 @@
       </div>
     </div>
 
-    <h3>로그</h3>
-    <div id="log">준비됨…</div>
+
   </div>
 
+  <!-- 🏠 플로팅 홈 버튼 -->
+  <a href="https://ubin128.github.io/green-sail/" class="floating-home-btn" title="홈으로 가기">홈</a>
+
   <script type="module">
+    // 🔗 Firestore 조회 함수만 사용
+    import { getRecordsByRangeAndClass } from './app-firebase.js';
 
-        // --- Firebase 함수 가져오기 ---
-        // (필요한 함수만 남겨두세요. 삭제 기능이 필요 없다면 아래 두 줄도 삭제 가능)
-        import{ getRecordsByRangeAndClass} from './app-firebase.js';
+    /* ========== 공용 유틸 & 로그 ========== */
+    const todayStr = () => new Date().toISOString().slice(0,10);
+    const log = (...a)=>{
+      const e=document.getElementById('log');
+      if (e) e.textContent=a.map(x=>typeof x==='object'?JSON.stringify(x,null,2):String(x)).join('\n');
+      console.log(...a);
+    };
 
-        // ✅ DOM 로딩 완료 후 스크립트 실행 시작
-        document.addEventListener('DOMContentLoaded', () => {
-        
-      /* ====== 유틸 ====== */
-        const todayStr = () => new Date().toISOString().slice(0,10);
-        const log = (...a)=>{
-            const e=document.getElementById('log');
-            // ✅ log 요소가 없을 경우 대비
-            if (e) e.textContent=a.map(x=>typeof x==='object'?JSON.stringify(x,null,2):String(x)).join('\n'); 
-            console.log(...a);
-        };
-
-        /* ====== 값 라벨 플러그인 ====== */
-        const valueLabelPlugin={       id:'valueLabel',
-      afterDatasetsDraw(chart){
+    /* ========== 값 라벨 플러그인(툴팁 겹침 방지) ========== */
+    const valueLabelPlugin = {
+      id: 'valueLabel',
+      afterDatasetsDraw(chart) {
         const { ctx, scales } = chart;
         const ds = chart.data.datasets[0];
         const meta = chart.getDatasetMeta(0);
         if (!ds || !meta) return;
         const baseY = scales.y?.getPixelForValue ? scales.y.getPixelForValue(0) : null;
         ctx.save();
-        meta.data.forEach((bar,i)=>{
+        meta.data.forEach((bar, i) => {
           const v = ds.data[i];
-          if (v==null || !bar) return;
-          const bh = (baseY!=null)?(baseY-bar.y):0;
-          const x=bar.x, y = bh>=24 ? bar.y+14 : bar.y-10;
-          ctx.font='12px system-ui';
-          ctx.textAlign='center';
-          ctx.fillStyle = bh>=24 ? '#fff' : '#333';
+          if (v == null || !bar) return;
+          const bh = (baseY != null) ? (baseY - bar.y) : 0;
+          const x = bar.x, y = bh >= 24 ? bar.y + 14 : bar.y - 10;
+          ctx.font = '12px system-ui';
+          ctx.textAlign = 'center';
+          ctx.fillStyle = bh >= 24 ? '#fff' : '#333';
           ctx.fillText(String(v), x, y);
         });
         ctx.restore();
-        }
-        }; 
-        Chart.register(valueLabelPlugin);
+      }
+    };
+    Chart.register(valueLabelPlugin);
 
-        /* ====== 차트 초기화 ====== */
-        // ✅ 차트 요소가 없을 경우 대비
-        const chart1Ctx = document.getElementById('chart1')?.getContext('2d');
-        const chart2Ctx = document.getElementById('chart2')?.getContext('2d');
-        let chart1, chart2; 
-
-        if (chart1Ctx) {
-            chart1 = new Chart(chart1Ctx, { type:'bar',
+    /* ========== 차트 2개 초기화 ========== */
+    const chart1 = new Chart(document.getElementById('chart1').getContext('2d'), {
+      type:'bar',
       data:{ labels:[], datasets:[{ label:'1학년 합계', data:[], borderWidth:2 }]},
       options:{
         responsive:true,
         layout:{ padding:{ top:24 }},
-        plugins:{ legend:{ display:false }, title:{ display:true, text:'1학년 반별 합계' } },
+        plugins:{ legend:{ display:false }, title:{ display:true, text:'1학년 반별 합계' }},
         scales:{ y:{ beginAtZero:true, ticks:{ stepSize:1 }}}
       }
-     });
-        }
-            if (chart2Ctx) {
-            chart2 = new Chart(chart2Ctx, { type:'bar',
+    });
+    const chart2 = new Chart(document.getElementById('chart2').getContext('2d'), {
+      type:'bar',
       data:{ labels:[], datasets:[{ label:'2학년 합계', data:[], borderWidth:2 }]},
       options:{
         responsive:true,
         layout:{ padding:{ top:24 }},
-        plugins:{ legend:{ display:false }, title:{ display:true, text:'2학년 반별 합계' } },
+        plugins:{ legend:{ display:false }, title:{ display:true, text:'2학년 반별 합계' }},
         scales:{ y:{ beginAtZero:true, ticks:{ stepSize:1 }}}
-      } });
-        }
-        
-        /* ====== Top3 강조 & 차트 갱신 ====== */
-        function paintTop3(chart, labels, values){ 
-             if (!chart) return; // ✅ 차트 없으면 중단
-             const s = values.map(v=>Number(v)||0);
+      }
+    });
+
+    /* ========== Top3 강조 + 차트 갱신 ========== */
+    function paintTop3(chart, labels, values){
+      const s = values.map(v=>Number(v)||0);
       const order = s.map((v,i)=>({v,i})).sort((a,b)=>b.v-a.v);
       const top = order.slice(0,3).map(x=>x.i);
       const bg = s.map((v,i)=> i===top[0] ? 'rgba(255,205,86,0.7)'
@@ -321,36 +294,34 @@
       chart.data.datasets[0].data = s;
       chart.data.datasets[0].backgroundColor = bg;
       chart.data.datasets[0].borderColor = bd;
-      chart.update(); 
-        }
+      chart.update();
+    }
 
-        /* ====== 반별 합산 ====== */
-        function groupByClass(records){ const by={};
-      for(const r of records){
-        const c=r.class||'미지정';
-        // ✅ log.html에서 계산된 totalKg 값을 직접 사용
-            by[c] = (by[c] || 0) + (r.totalKg || 0);
+    /* ========== 반별 합산 (totalKg 있으면 사용, 없으면 튜플 합계) ========== */
+    function groupByClass(records){
+      const by = {};
+      for (const r of records){
+        const c = r.class || '미지정';
+        const fallback = (r.tumbler||0)+(r.lightOff||0)+(r.zeroWaste||0);
+        const val = r.totalKg!=null ? Number(r.totalKg) : fallback; // ← 안전한 합산
+        by[c] = (by[c] || 0) + val;
       }
-        // 소수점 둘째 자리까지 반올림하여 정렬
-        const sorted = Object.entries(by).sort((a,b) => b[1] - a[1]);
-        // 값을 다시 소수점 둘째 자리 문자열로 변환 (표시용)
-        const entriesFormatted = sorted.map(([cls, total]) => [cls, parseFloat(total.toFixed(2))]);
-      return { labels: entriesFormatted.map(x => x[0]), 
-            values: entriesFormatted.map(x => x[1]), 
-            entries: entriesFormatted }; }
+      const sorted = Object.entries(by).sort((a,b)=>b[1]-a[1]);
+      // 소수 2자리 반올림 (표시 깔끔)
+      const entries = sorted.map(([cls,total]) => [cls, Number(total.toFixed(2))]);
+      return { labels: entries.map(x=>x[0]), values: entries.map(x=>x[1]), entries };
+    }
 
-        /* ====== 1·2학년 분리 렌더 ====== */
-        function renderSeparated(records){ const first  = records.filter(r=>(r.class||'').startsWith('1-'));
-      const second = records.filter(r=>(r.class||'').startsWith('2-'));
-
+    /* ========== 1·2학년 분리 렌더 ========== */
+    function renderSeparated(records){
+      const first  = records.filter(r => (r.class||'').startsWith('1-'));
+      const second = records.filter(r => (r.class||'').startsWith('2-'));
       const g1 = groupByClass(first);
       const g2 = groupByClass(second);
-
       paintTop3(chart1, g1.labels, g1.values);
       paintTop3(chart2, g2.labels, g2.values);
-
-      const drawRank=(tbodySel, entries)=>{
-        const tb=document.querySelector(tbodySel);
+      const drawRank = (tbodySel, entries)=>{
+        const tb = document.querySelector(tbodySel);
         tb.innerHTML = entries.length===0
           ? `<tr><td colspan="3" style="text-align:center;color:#888;">데이터가 없습니다</td></tr>`
           : entries.map(([cls,total],i)=>{
@@ -359,130 +330,107 @@
             }).join('');
       };
       drawRank('#rank1 tbody', g1.entries);
-      drawRank('#rank2 tbody', g2.entries); }
+      drawRank('#rank2 tbody', g2.entries);
+    }
 
-        /* ====== 모드/필터 UI ====== */
-        function getViewMode(){ return document.getElementById('modeDaily').checked ? 'daily' : 'cumulative'; }
-        function updateFilterUI(){ const mode = getViewMode();
+    /* ========== 보기 모드 UI / 적용 로직 분리 ========== */
+    const getViewMode = () => document.getElementById('modeDaily').checked ? 'daily' : 'cumulative';
+    function updateFilterUI(){
       const daily  = document.getElementById('dailyInputs');
-      const range  = document.getElementById('rangeInputs');
-      if (mode === 'daily') {
+      const quick  = document.getElementById('quickRange');
+      if (getViewMode()==='daily'){
         daily.style.display = 'inline-flex';
-        range.style.display = 'none';
-      } else {
-        daily.style.display = 'inline-flex'; // 둘 다 보이게 하고 싶다면 이 줄을 'none'으로 바꿔도 됨
+        quick.style.display = 'none';
+      }else{
         daily.style.display = 'none';
-        range.style.display = 'inline-flex';
-      } }
+        quick.style.display = 'inline-flex';
+      }
+    }
 
-        /* ====== 이벤트 바인딩 ====== */
-        // 데이터 관리 버튼 관련 코드는 이미 주석 처리됨
+    // 마지막 적용 기준(자동 새로고침용)
+    let lastCriteria = { start: undefined, end: undefined, cls: 'ALL' };
 
-        // ✅ 모든 getElementById 및 addEventListener 코드가 이 안으로 들어옵니다.
-        const loadBtn = document.getElementById('loadBtn');
-        if (loadBtn) loadBtn.onclick = () => applyFilters();
+    async function applyWith({ start, end, cls }){
+      try{
+        const records = await getRecordsByRangeAndClass({ startDate:start, endDate:end, cls });
+        log('🔎 적용 기준:', { start, end, cls, count: records.length });
+        renderSeparated(records);
+        lastCriteria = { start, end, cls };
+      }catch(e){
+        console.error(e);
+        alert('필터 적용 실패: ' + (e.code || e.message));
+      }
+    }
 
-        const modeDaily = document.getElementById('modeDaily');
-        if (modeDaily) modeDaily.addEventListener('change', ()=>{ updateFilterUI(); applyFilters(); });
-        
-        const modeCumulative = document.getElementById('modeCumulative');
-        if (modeCumulative) modeCumulative.addEventListener('change', ()=>{ updateFilterUI(); applyFilters(); });
+    // A. 보기 모드 제어
+    document.getElementById('modeDaily').addEventListener('change', updateFilterUI);
+    document.getElementById('modeCumulative').addEventListener('change', updateFilterUI);
 
-        const btnToday = document.getElementById('btnToday');
-        if (btnToday) btnToday.onclick = () => { // ✅ '하루' 모드로 바꾸고, 날짜를 '오늘'로 설정 후 필터 적용
-            document.getElementById('modeDaily').checked = true;
-            updateFilterUI(); // 날짜 입력 UI 변경
-            document.getElementById('viewDate').value = todayStr(); // 오늘 날짜 설정
-            document.getElementById('filterStart').value = ''; // 기간 필터 초기화
-            document.getElementById('filterEnd').value   = ''; // 기간 필터 초기화
-            applyFilters(); // 필터 적용 };
-        
-        const fmt = d => d.toISOString().slice(0,10);
-        
-       /* const btnThisWeek = document.getElementById('btnThisWeek');
-        if (btnThisWeek) btnThisWeek.onclick=()=>{ // ✅ '누적' 모드로 바꾸고, 날짜를 '이번 주'로 설정 후 필터 적용
-            document.getElementById('modeCumulative').checked = true;
-            updateFilterUI();
-            const n=new Date(); const m=new Date(n);
-            m.setDate(n.getDate()-(n.getDay()+6)%7); // 이번 주 월요일 계산
-            const s=fmt(m), e=fmt(new Date(m.getFullYear(),m.getMonth(),m.getDate()+6)); // 이번 주 일요일 계산
-            document.getElementById('filterStart').value=s; // 시작 날짜 설정
-            document.getElementById('filterEnd').value=e;   // 끝 날짜 설정
-            applyFilters(); // 필터 적용 };
+    document.getElementById('btnToday').onclick = () => {
+      document.getElementById('modeDaily').checked = true;
+      updateFilterUI();
+      document.getElementById('viewDate').value = todayStr();
+    };
 
-        const btnThisMonth = document.getElementById('btnThisMonth');
-        if (btnThisMonth) btnThisMonth.onclick=()=>{ // ✅ '누적' 모드로 바꾸고, 날짜를 '이번 달'로 설정 후 필터 적용
-            document.getElementById('modeCumulative').checked = true;
-            updateFilterUI();
-            const n=new Date();
-            const s=fmt(new Date(n.getFullYear(),n.getMonth(),1)); // 이번 달 1일 계산
-            const e=fmt(new Date(n.getFullYear(),n.getMonth()+1,0)); // 이번 달 마지막 날 계산
-            document.getElementById('filterStart').value=s;
-            document.getElementById('filterEnd').value=e;
-            applyFilters(); }; */
-        
-        const btnClear = document.getElementById('btnClear');
-        if (btnClear) btnClear.onclick=()=>{ // ✅ '누적' 모드로 바꾸고, 모든 필터(날짜, 반) 초기화 후 필터 적용
-            document.getElementById('modeCumulative').checked = true;
-            updateFilterUI();
-            document.getElementById('filterStart').value='';
-            document.getElementById('filterEnd').value='';
-            document.getElementById('filterClass').value=''; // 반 필터도 초기화
-            applyFilters(); };
-        
-        const btnApply = document.getElementById('btnApply');
-        if (btnApply) btnApply.onclick=()=> applyFilters();
+    document.getElementById('btnThisWeek').onclick = () => {
+      document.getElementById('modeCumulative').checked = true;
+      updateFilterUI();
+      const n=new Date(), m=new Date(n);
+      m.setDate(n.getDate()-(n.getDay()+6)%7);
+      const s = m.toISOString().slice(0,10);
+      const e = new Date(m.getFullYear(), m.getMonth(), m.getDate()+6).toISOString().slice(0,10);
+      // dataset에 보관
+      document.getElementById('modeCumulative').dataset.quickStart = s;
+      document.getElementById('modeCumulative').dataset.quickEnd   = e;
+    };
 
-        // 삭제 기능 주석처리 된 부분도 이 안에 포함됩니다.
-        /*
-        const deleteAllBtn = document.getElementById('deleteAll');
-        if (deleteAllBtn) deleteAllBtn.onclick = ...;
-        const deleteByClassBtn = document.getElementById('deleteByClass');
-        if (deleteByClassBtn) deleteByClassBtn.onclick = ...;
-        */
+    document.getElementById('btnThisMonth').onclick = () => {
+      document.getElementById('modeCumulative').checked = true;
+      updateFilterUI();
+      const n=new Date();
+      const s=new Date(n.getFullYear(), n.getMonth(), 1).toISOString().slice(0,10);
+      const e=new Date(n.getFullYear(), n.getMonth()+1, 0).toISOString().slice(0,10);
+      document.getElementById('modeCumulative').dataset.quickStart = s;
+      document.getElementById('modeCumulative').dataset.quickEnd   = e;
+    };
 
-        /* ====== 필터 적용 ====== */
-        async function applyFilters(){ 
-            // ✅ 필터 입력 요소 존재 확인 추가
-            const clsInput = document.getElementById('filterClass');
-            const dateInput = document.getElementById('viewDate');
-            const startInput = document.getElementById('filterStart');
-            const endInput = document.getElementById('filterEnd');
+    document.getElementById('btnAll').onclick = () => {
+      document.getElementById('modeCumulative').checked = true;
+      updateFilterUI();
+      delete document.getElementById('modeCumulative').dataset.quickStart;
+      delete document.getElementById('modeCumulative').dataset.quickEnd;
+    };
 
-            const mode = getViewMode();
-            const cls  = (clsInput?.value || '').trim() || 'ALL';
-            const day   = dateInput?.value || todayStr();
-            const start = (mode === 'daily') ? day : (startInput?.value || undefined);
-            const end   = (mode === 'daily') ? day : (endInput?.value   || undefined);
+    document.getElementById('btnApplyMode').onclick = () => {
+      const cls = (document.getElementById('filterClass').value || '').trim() || 'ALL';
+      if (getViewMode()==='daily'){
+        const day = document.getElementById('viewDate').value || todayStr();
+        applyWith({ start: day, end: day, cls });
+      } else {
+        const s = document.getElementById('modeCumulative').dataset.quickStart;
+        const e = document.getElementById('modeCumulative').dataset.quickEnd;
+        applyWith({ start: s, end: e, cls });
+      }
+    };
 
-            log('⏳ 데이터 로딩 중...', { mode, start, end, cls });
-            try {
-                const records = await getRecordsByRangeAndClass({ startDate: start, endDate: end, cls });
-                log(`🔎 로드 완료: ${records.length} 건`, { mode, start, end, cls });
-                renderSeparated(records);
-            } catch(e) {
-                console.error(e);
-                alert('데이터 로드 실패: ' + (e.code || e.message));
-                log('❌ 데이터 로드 실패', e);
-                renderSeparated([]);
-            }
-        }
+    // B. 직접 기간 지정
+    document.getElementById('btnApplyCustom').onclick = () => {
+      const s = document.getElementById('startCustom').value || undefined;
+      const e = document.getElementById('endCustom').value   || undefined;
+      const cls = (document.getElementById('filterClass').value || '').trim() || 'ALL';
+      applyWith({ start: s, end: e, cls });
+    };
+    document.getElementById('btnClearCustom').onclick = () => {
+      document.getElementById('startCustom').value = '';
+      document.getElementById('endCustom').value   = '';
+    };
 
-        // 자동 새로고침 & 초기화
-        updateFilterUI(); // UI 초기 상태 설정
-        const intervalId = setInterval(()=>applyFilters(), 15000); // ID 저장
-        applyFilters(); // 페이지 첫 로드 시 실행
+    // 자동 새로고침: 마지막 기준 그대로
+    setInterval(() => applyWith(lastCriteria), 15000);
 
-        // ✅ 페이지 벗어날 때 인터벌 정리 (선택사항이지만 권장)
-        window.addEventListener('beforeunload', () => {
-            clearInterval(intervalId);
-        });
-
-    }}); // ✅ DOMContentLoaded 리스너 닫는 괄호
-</script>
-<a href="https://ubin128.github.io/green-sail/" class="floating-home-btn" title="홈으로 가기">🏠</a>
-
-
+    // 초기화
+    updateFilterUI();
+    applyWith({ start: undefined, end: undefined, cls: 'ALL' });
+  </script>
 </body>
 </html>
-
