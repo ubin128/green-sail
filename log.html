@@ -145,6 +145,19 @@
     border-color: var(--accent);
     box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
 }
+    /* 확인 버튼이 비활성화 됐을 때 스타일 */
+#btnConfirmStudent:disabled {
+    background: #9ca3af; /* 회색 */
+    cursor: not-allowed;
+    box-shadow: none;
+}
+/* 학생 정보 입력칸과 버튼의 크기 조절 */
+.student-input-area input {
+    flex: 1; /* 입력칸이 남은 공간을 차지 */
+}
+#btnConfirmStudent {
+    flex-shrink: 0; /* 버튼이 찌그러지지 않게 */
+}
     </style>
 </head>
 <body>
@@ -156,7 +169,7 @@
 
 
         <h1>오늘의 기록</h1>
-        <p class="sub">오늘 실천한 친환경 생활 습관을 체크해주세용 ( 양심적으로 할 것❗️ )</p>
+        <p class="sub">오늘 실천한 친환경 생활 습관을 체크해주세요. ( 양심적으로 할 것❗️ )<br>챌린지 진행 기간: 10/21~ 10/24<br>참여 대상: 1, 2학년<br>반 1등하면 상품있어요!! 많이 참여해주세요ㅠㅠ</p>
 
         <div class="datebox">
             <span id="todayStr"></span>
@@ -166,6 +179,7 @@
             <input type="number" id="studentGrade" placeholder="학년 (예: 1학년)" min="1" max="2">
             <input type="number" id="studentClass" placeholder="반 (예: 1반)" min="1" max="13">
             <input type="number" id="studentNumber" placeholder="학번 (예: 1번)" min="1" max="40">
+            <button class="btn" id="btnConfirmStudent">확인</button>
         </div>
 
         <div class="grid" id="list">
@@ -304,12 +318,15 @@
     const container = document.querySelector('.container');
     const btnSave = document.getElementById('btnSave');
     const btnResetToday = document.getElementById('btnResetToday');
+    const btnConfirmStudent = document.getElementById('btnConfirmStudent'); // ✅ '확인' 버튼 요소 추가
 
     const now = new Date();
     const todayKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 
     // document.getElementById('todayStr').textContent = `${now.getFullYear()}년 ${String(now.getMonth() + 1).padStart(2, '0')}월 ${String(now.getDate()).padStart(2, '0')}일`;
 
+    // ✅ 현재 확인된 학생 ID를 저장할 변수
+    let currentStudentId = null;
 
     // 캠페인 기간 확인 및 비활성화 (기존과 동일)
     const isCampaignPeriod = CAMPAIGN_DATES.includes(todayKey);
@@ -325,27 +342,59 @@
         btnResetToday.disabled = true;
     }
 
-    // 학생 정보 변경 시 메인 함수 (async 추가)
-    async function handleStudentInputChange() {
+ // ✅ [변경] 학생 정보 입력 시 - 이제 데이터 로딩 대신 '확인' 버튼 활성화/비활성화만 처리
+    function handleStudentInputChange() {
         if (!isCampaignPeriod) return;
-
+        
         const grade = gradeInput.value;
         const cls = classInput.value;
         const num = numberInput.value;
 
-        if (!grade || !cls || !num) {
+        // 3개 필드가 모두 채워져야 확인 버튼 활성화
+        btnConfirmStudent.disabled = !(grade && cls && num);
+
+        // (보안) 입력이 변경되면, 이전 확인 상태를 초기화
+        if (currentStudentId) {
+            currentStudentId = null;
             list.querySelectorAll('input').forEach(ch => { ch.checked = false; ch.disabled = true; });
-            pastRecordsContainer.innerHTML = '<div class="summary-box"><p style="text-align:center; color: var(--muted);">학년, 반, 학번을 모두 입력하면 기록을 조회할 수 있습니다.</p></div>';
+            pastRecordsContainer.innerHTML = '';
+            MSG.classList.remove('show');
             calcSum();
+            [gradeInput, classInput, numberInput].forEach(el => el.disabled = false);
+        }
+    }
+
+    // ✅ [신규] '확인' 버튼 클릭 시 실행될 함수
+    async function confirmStudentAndLoadData() {
+        if (!isCampaignPeriod) return;
+        
+        const grade = parseInt(gradeInput.value);
+        const cls = parseInt(classInput.value);
+        const num = parseInt(numberInput.value);
+
+        if (!(grade >= 1 && grade <= 2 && cls >= 1 && cls <= 13 && num >= 1 && num <= 40)) {
+            alert('학년(1-2), 반(1-13), 학번(1-40)을 올바르게 입력해주세요.');
             return;
         }
 
-        list.querySelectorAll('input').forEach(ch => ch.disabled = false);
-        const studentId = `${grade}-${cls}-${num}`;
+        currentStudentId = `${grade}-${cls}-${num}`; // 학생 ID 확정
 
-        // ✅ Firebase에서 데이터 로드 (await 추가)
-        await showStudentPastRecords(studentId);
-        await loadStudentTodayRecord(studentId);
+        MSG.textContent = '🔄 기록을 불러오는 중...';
+        MSG.classList.add('show');
+        pastRecordsContainer.innerHTML = '<div class="summary-box"><p style="color: var(--muted);">지난 기록을 불러오는 중...</p></div>';
+
+        try {
+            await showStudentPastRecords(currentStudentId);
+            await loadStudentTodayRecord(currentStudentId);
+            
+            list.querySelectorAll('input').forEach(ch => ch.disabled = false);
+            //[gradeInput, classInput, numberInput, btnConfirmStudent].forEach(el => el.disabled = true);
+        } catch (error) {
+            console.error("데이터 로드 오류:", error);
+            MSG.textContent = '❌ 기록 로딩 중 오류가 발생했습니다.';
+            pastRecordsContainer.innerHTML = '';
+            currentStudentId = null;
+        }
     }
 
     // '나의 지난 모든 기록' 보여주기 (Firebase 사용, async 추가)
@@ -386,7 +435,7 @@
         // ✅ Firebase에서 해당 학생의 '오늘' 기록 가져오기
         const todayRecord = await getStudentRecords(studentId, [todayKey]);
 
-        if (todayRecord.length > 0) {
+        if (todayRecord.length > 0 && Array.isArray(todayRecord[0].checks)) {
             const savedChecks = todayRecord[0].checks;
             list.querySelectorAll('input[type="checkbox"]').forEach(ch => {
                 ch.checked = savedChecks.includes(ch.id);
@@ -412,71 +461,77 @@
     list.addEventListener('change', calcSum); // 이벤트 리스너 추가
 
     // 저장 버튼 (Firebase 사용, async 추가)
-    btnSave.addEventListener('click', async () => {
-        const grade = parseInt(gradeInput.value);
-        const cls = parseInt(classInput.value);
-        const num = parseInt(numberInput.value);
+btnSave.addEventListener('click', async () => {
+    // ✅ [변경] currentStudentId 확인 로직 추가
+    if (!currentStudentId) {
+        alert('먼저 학년, 반, 학번을 입력하고 확인 버튼을 눌러주세요.');
+        return;
+    }
+    
+    // ✅ [변경] 확정된 ID 사용
+    const [grade, cls, num] = currentStudentId.split('-');
+    const studentClass = `${grade}-${cls}`;
+    
+    // ... (이하 저장 로직은 기존과 거의 동일) ...
+    const todaySum = calcSum();
+    const checkedIds = Array.from(list.querySelectorAll('input[type="checkbox"]:checked')).map(ch => ch.id);
 
-        // 유효성 검사 (기존과 동일)
-        if (!(grade >= 1 && grade <= 2 && cls >= 1 && cls <= 13 && num >= 1 && num <= 40)) {
-            alert('학년(1-2), 반(1-13), 학번(1-40)을 올바르게 입력해주세요.');
-            return;
-        }
+    const record = {
+        class: studentClass, 
+        student: currentStudentId, // ✅ 확정된 ID 사용
+        date: todayKey,
+        checks: checkedIds, 
+        totalKg: todaySum,
+    };
 
-        const studentId = `${grade}-${cls}-${num}`;
-        const studentClass = `${grade}-${cls}`;
-        const todaySum = calcSum();
-        const checkedIds = Array.from(list.querySelectorAll('input[type="checkbox"]:checked')).map(ch => ch.id);
-
-        const record = {
-            class: studentClass, student: studentId, date: todayKey,
-            checks: checkedIds, totalKg: todaySum,
-        };
-
-        try {
-            MSG.textContent = '💾 저장 중...';
-            MSG.classList.add('show');
-            await upsertStudentRecord(record); // ✅ Firebase에 저장
-            MSG.textContent = `✅ 저장되었습니다! 오늘 나의 기록: ${todaySum.toFixed(2)} kg CO₂`;
-        } catch (error) {
-             MSG.textContent = `❌ 저장 실패: ${error.message}`;
-             console.error(error);
-        }
-    });
+    try {
+        MSG.textContent = '💾 저장 중...';
+        MSG.classList.add('show');
+        await upsertStudentRecord(record); // ✅ Firebase에 저장
+        MSG.textContent = `✅ 저장되었습니다! 오늘 나의 기록: ${todaySum.toFixed(2)} kg CO₂`;
+    } catch (error) {
+         MSG.textContent = `❌ 저장 실패: ${error.message}`;
+         console.error(error);
+    }
+});
 
     // 초기화 버튼 (Firebase 사용, async 추가)
-    btnResetToday.addEventListener('click', async () => {
-        const grade = gradeInput.value;
-        const cls = classInput.value;
-        const num = numberInput.value;
+btnResetToday.addEventListener('click', async () => {
+    // ✅ [변경] currentStudentId 확인 로직 추가
+    if (!currentStudentId) {
+        alert('먼저 학년, 반, 학번을 입력하고 확인 버튼을 눌러주세요.');
+        return;
+    }
 
-        if (!grade || !cls || !num) {
-            alert('초기화할 학생의 정보를 먼저 입력해주세요.');
-            return;
-        }
-        const studentId = `${grade}-${cls}-${num}`;
+    // ✅ [변경] 확정된 ID 사용 (삭제할 학생 ID)
+    const studentId = currentStudentId; 
 
-        try {
-            MSG.textContent = '🗑️ 삭제 중...';
-            MSG.classList.add('show');
-            const deleted = await deleteStudentRecord(todayKey, studentId); // ✅ Firebase에서 삭제
-            if (deleted) {
-                list.querySelectorAll('input').forEach(ch => ch.checked = false);
-                calcSum();
-                MSG.textContent = '♻️ 오늘 나의 기록을 초기화했습니다.';
-            } else {
-                 MSG.textContent = 'ℹ️ 삭제할 기록이 없습니다.';
-            }
-        } catch(error) {
-             MSG.textContent = `❌ 초기화 실패: ${error.message}`;
-             console.error(error);
+    try {
+        MSG.textContent = '🗑️ 삭제 중...';
+        MSG.classList.add('show');
+        
+        // ✅ Firebase에서 해당 학생의 '오늘' 기록만 삭제
+        const deleted = await deleteStudentRecord(todayKey, studentId); 
+
+        if (deleted) {
+            // ✅ 삭제 성공 시 화면 초기화
+            list.querySelectorAll('input').forEach(ch => ch.checked = false);
+            calcSum(); // 합계 0으로 업데이트
+            MSG.textContent = '♻️ 오늘 나의 기록을 초기화했습니다.';
+        } else {
+             MSG.textContent = 'ℹ️ 이미 기록이 없습니다.'; // Firebase에 삭제할 데이터가 없었음
         }
-    });
+    } catch(error) {
+         MSG.textContent = `❌ 초기화 실패: ${error.message}`;
+         console.error(error);
+    }
+});
 
     // 이벤트 리스너 연결 (기존과 동일)
     gradeInput.addEventListener('input', handleStudentInputChange);
     classInput.addEventListener('input', handleStudentInputChange);
     numberInput.addEventListener('input', handleStudentInputChange);
+    btnConfirmStudent.addEventListener('click', confirmStudentAndLoadData); // ✅ 확인 버튼 이벤트 연결
 
     // 페이지 첫 로드 시 실행 (기존과 동일)
     handleStudentInputChange();
