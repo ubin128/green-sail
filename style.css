@@ -41,6 +41,11 @@ body{
 .fade{opacity:0; transform:translateY(16px); transition:opacity 1.3s ease, transform 1.3s ease}
 .fade.visible{opacity:1; transform:none}
 
+/* ✅ 스크롤을 막기 위한 CSS 클래스 */
+body.scroll-locked {
+    overflow: hidden; /* 페이지 내용이 넘쳐도 스크롤바를 숨기고 스크롤을 막음 */
+}
+
 /* Hero 영역 */
 .hero1{
   min-height:100vh; display:flex; align-items:flex-start; padding-top:20vh; position:relative;

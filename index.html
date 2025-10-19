@@ -91,7 +91,7 @@
     // --- Import Firebase functions ---
     import { getRecordsByRangeAndClass } from './app-firebase.js';
 
-    // 페이드인/아웃 (기존과 동일)
+    // 페이드인/아웃
     const io = new IntersectionObserver((entries)=>{
         entries.forEach(entry=>{
             if(entry.isIntersecting){ entry.target.classList.add('visible'); }
@@ -102,6 +102,10 @@
 
     // --- ✨ 모든 애니메이션을 제어하는 새로운 코드 ---
     window.addEventListener('load', () => {
+        
+        // ✅ 1. 페이지 로드 즉시 화면(스크롤) 잠금!
+        document.body.classList.add('scroll-locked');
+
         const boat = document.getElementById('boat');
         const t1 = document.getElementById('hero1-title');
         const s1 = document.getElementById('hero1-subtitle');
@@ -123,9 +127,7 @@
 
         // --- 3. 회전이 끝나면, 자동 항해 시작 ---
         boat.addEventListener('transitionend', function startJourneyOnce(event) {
-            // 'transform' 애니메이션이 끝났을 때만 실행
             if (event.propertyName !== 'transform' || boat.style.opacity === '0') return;
-            
             boat.removeEventListener('transitionend', startJourneyOnce);
             startJourney();
         });
@@ -138,7 +140,11 @@
             document.querySelectorAll('.fade, .isle-mark').forEach(el => el.classList.add('visible'));
 
             const targetSection = document.getElementById(TARGET_SECTION_ID);
-            if (!targetSection) return;
+            if (!targetSection) {
+                // ✅ 만약 목적지를 못찾으면 스크롤 잠금 해제 (안전장치)
+                document.body.classList.remove('scroll-locked');
+                return;
+            }
 
             const boatRect = boat.getBoundingClientRect();
             const startBoatY = boatRect.top + (boatRect.height / 2);
@@ -160,7 +166,6 @@
                     if (t < 1) {
                         requestAnimationFrame(animate);
                     } else {
-                        // 4. 항해 도착 후, 마무리 애니메이션 실행
                         finishJourney();
                     }
                 }
@@ -170,18 +175,19 @@
 
         // 마무리 애니메이션 함수
         function finishJourney() {
-            // 4-1. 원래 각도로 회전 (1.5초 동안)
             boat.style.transition = "transform 1.5s ease";
             boat.style.transform = "translateX(-50%) rotate(0deg)";
 
-            // 4-2. 회전이 끝난 후, 서서히 사라지기 (페이드 아웃)
             setTimeout(() => {
                 boat.style.transition = "opacity 1.5s ease";
                 boat.style.opacity = 0;
-            }, 1500); // 회전 시간(1500ms)이 끝난 직후에 실행
+
+                // ✅ 2. 모든 애니메이션이 끝나면 화면(스크롤) 잠금 해제!
+                document.body.classList.remove('scroll-locked');
+
+            }, 1500); 
         }
     });
-
        // Eco HUD
     (async function (){
     const hud = document.getElementById('ecoHud');
